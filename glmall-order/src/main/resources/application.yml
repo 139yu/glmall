@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:mysql://106.55.2.133:3306/gulimall_oms
+    username: root
+    password: 520..xj/
+    driver-class-name: com.mysql.jdbc.Driver
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+  application:
+    name: glmall-order
+mybatis-plus:
+  mapper-locations: classpath:/mapper/**/*.xml
+  global-config:
+    db-config:
+      id-type: auto
+server:
+  port: 10013

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xj.glmall.member.dao.IntegrationConsumeSettingDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.xj.glmall.member.entity.IntegrationConsumeSettingEntity" id="integrationConsumeSettingMap">
+        <result property="id" column="id"/>
+        <result property="deductionPerAmount" column="deduction_per_amount"/>
+        <result property="maxPercentPerOrder" column="max_percent_per_order"/>
+        <result property="useUnit" column="use_unit"/>
+        <result property="couponStatus" column="coupon_status"/>
+    </resultMap>
+
+
+</mapper>

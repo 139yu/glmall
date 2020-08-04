@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xj.glmall.coupon.dao.CouponProductCategoryRelationDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.xj.glmall.coupon.entity.CouponProductCategoryRelationEntity" id="couponProductCategoryRelationMap">
+        <result property="id" column="id"/>
+        <result property="couponId" column="coupon_id"/>
+        <result property="productCategoryId" column="product_category_id"/>
+        <result property="productCategoryName" column="product_category_name"/>
+        <result property="parentCategoryName" column="parent_category_name"/>
+    </resultMap>
+
+
+</mapper>

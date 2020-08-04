@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xj.glmall.order.dao.CartItemDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.xj.glmall.order.entity.CartItemEntity" id="cartItemMap">
+        <result property="id" column="id"/>
+        <result property="productId" column="product_id"/>
+        <result property="productSkuId" column="product_sku_id"/>
+        <result property="memberId" column="member_id"/>
+        <result property="quantity" column="quantity"/>
+        <result property="price" column="price"/>
+        <result property="sp1" column="sp1"/>
+        <result property="sp2" column="sp2"/>
+        <result property="sp3" column="sp3"/>
+        <result property="productPic" column="product_pic"/>
+        <result property="productName" column="product_name"/>
+        <result property="productSubTitle" column="product_sub_title"/>
+        <result property="productSkuCode" column="product_sku_code"/>
+        <result property="memberNickname" column="member_nickname"/>
+        <result property="createDate" column="create_date"/>
+        <result property="modifyDate" column="modify_date"/>
+        <result property="deleteStatus" column="delete_status"/>
+        <result property="productCategoryId" column="product_category_id"/>
+        <result property="productBrand" column="product_brand"/>
+        <result property="productSn" column="product_sn"/>
+        <result property="productAttr" column="product_attr"/>
+    </resultMap>
+
+
+</mapper>
