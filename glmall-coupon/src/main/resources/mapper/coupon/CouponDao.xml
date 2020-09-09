@@ -6,10 +6,10 @@
 	<!-- 可根据自己的需求，是否要使用 -->
     <resultMap type="com.xj.glmall.coupon.entity.CouponEntity" id="couponMap">
         <result property="id" column="id"/>
-        <result property="type" column="type"/>
-        <result property="name" column="name"/>
-        <result property="platform" column="platform"/>
-        <result property="count" column="count"/>
+        <result property="couponType" column="coupon_type"/>
+        <result property="couponImg" column="coupon_img"/>
+        <result property="couponName" column="coupon_name"/>
+        <result property="num" column="num"/>
         <result property="amount" column="amount"/>
         <result property="perLimit" column="per_limit"/>
         <result property="minPoint" column="min_point"/>
@@ -20,9 +20,11 @@
         <result property="publishCount" column="publish_count"/>
         <result property="useCount" column="use_count"/>
         <result property="receiveCount" column="receive_count"/>
-        <result property="enableTime" column="enable_time"/>
+        <result property="enableStartTime" column="enable_start_time"/>
+        <result property="enableEndTime" column="enable_end_time"/>
         <result property="code" column="code"/>
         <result property="memberLevel" column="member_level"/>
+        <result property="publish" column="publish"/>
     </resultMap>
 
 

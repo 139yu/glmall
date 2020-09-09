@@ -12,6 +12,13 @@ spring:
             - Path=/api/thirdparty/**
           filters:
             - RewritePath=/api/thirdparty(?<segment>/?.*),/$\{segment}
+        - id: coupon_route
+          uri: lb://glmall-coupon
+          predicates:
+            - Path=/api/coupon/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*),/$\{segment}
+
         - id: product_route
           uri: lb://glmall-product
           predicates:
@@ -19,6 +26,12 @@ spring:
           filters:
             - RewritePath=/api(?<segment>/?.*),/$\{segment}
 
+        - id: member_route
+          uri: lb://glmall-member
+          predicates:
+            - Path=/api/member/**
+          filters:
+              - RewritePath=/api(?<segment>/?.*),/$\{segment}
 
         - id: admin_route
           uri: lb://renren-fast

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xj.glmall.product.dao.AttrGroupDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.xj.glmall.product.entity.AttrGroupEntity" id="attrGroupMap">
+        <result property="attrGroupId" column="attr_group_id"/>
+        <result property="attrGroupName" column="attr_group_name"/>
+        <result property="sort" column="sort"/>
+        <result property="descript" column="descript"/>
+        <result property="icon" column="icon"/>
+        <result property="catelogId" column="catelog_id"/>
+    </resultMap>
+    <delete id="deleteBatchRelation">
+        delete from pms_attr_attrgroup_relation where
+        <foreach collection="relationEntities" item="item" separator="or">
+            (attr_id = #{item.attrId} and attr_group_id = #{item.attrGroupId})
+        </foreach>
+    </delete>
+    <select id="selectAttrByAttrgroupId" resultMap="com.xj.glmall.product.dao.AttrDao.attrMap">
+        select
+            attr.attr_id,
+            attr.attr_name,
+            attr.search_type,
+            attr.icon,
+            attr.value_select,
+            attr.attr_type,
+            attr.enable,
+            attr.catelog_id,
+            attr.show_desc
+        from
+            pms_attr attr
+        join
+            pms_attr_attrgroup_relation aar
+        on
+            attr.attr_id = aar.attr_id
+        join
+            pms_attr_group ag
+        on
+            ag.attr_group_id = aar.attr_group_id
+        where
+            ag.attr_group_id = #{attrgroupId}
+
+    </select>
+
+
+</mapper>

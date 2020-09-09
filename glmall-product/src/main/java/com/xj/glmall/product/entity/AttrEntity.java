@@ -9,7 +9,7 @@ import lombok.Data;
 
 /**
  * 商品属性
- * 
+ *
  * @author yu
  * @email ${email}
  * @date 2020-07-28 22:29:04
@@ -57,4 +57,5 @@ public class AttrEntity implements Serializable {
 	 */
 	private Integer showDesc;
 
+	private Integer valueType;
 }

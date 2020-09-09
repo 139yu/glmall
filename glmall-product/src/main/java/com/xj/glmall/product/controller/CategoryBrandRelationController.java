@@ -1,8 +1,12 @@
 package com.xj.glmall.product.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import com.xj.glmall.product.entity.BrandEntity;
+import com.xj.glmall.product.vo.BrandVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,7 +39,23 @@ public class CategoryBrandRelationController {
 
         return R.ok().put("page", page);
     }
+    @GetMapping("/brands/list")
+    public R getListByCatId(@RequestParam("catId") Long catId){
+        List<BrandEntity> brandList = categoryBrandRelationService.getBrandByCatId(catId);
+        List<Object> collect = brandList.stream().map(item -> {
+            BrandVo brandVo = new BrandVo();
+            brandVo.setBrandId(item.getBrandId());
+            brandVo.setBrandName(item.getName());
+            return brandVo;
+        }).collect(Collectors.toList());
+        return R.ok().put("data",collect);
+    }
 
+    @GetMapping("/catelog/list")
+    public R getRelationList(@RequestParam("brandId") Long brandId) {
+        List<CategoryBrandRelationEntity> data = categoryBrandRelationService.getRelationList(brandId);
+        return R.ok().put("data",data);
+    }
 
     /**
      * 信息
@@ -52,8 +72,7 @@ public class CategoryBrandRelationController {
      */
     @PostMapping("/save")
     public R save(@RequestBody CategoryBrandRelationEntity categoryBrandRelation){
-		categoryBrandRelationService.save(categoryBrandRelation);
-
+        categoryBrandRelationService.saveDetails(categoryBrandRelation);
         return R.ok();
     }
 
@@ -70,7 +89,7 @@ public class CategoryBrandRelationController {
     /**
      * 删除
      */
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     public R delete(@RequestBody Long[] ids){
 		categoryBrandRelationService.removeByIds(Arrays.asList(ids));
 

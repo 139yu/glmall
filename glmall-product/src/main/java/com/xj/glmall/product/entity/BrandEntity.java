@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.xj.glmall.common.valid.AddGroup;
+import com.xj.glmall.common.valid.ListValue;
 import com.xj.glmall.common.valid.UpdateGroup;
 import lombok.Data;
 import org.apache.ibatis.annotations.Update;
@@ -19,7 +20,7 @@ import javax.validation.constraints.Null;
 
 /**
  * 品牌
- * 
+ *
  * @author yu
  * @email ${email}
  * @date 2020-07-28 22:29:04
@@ -53,6 +54,7 @@ public class BrandEntity implements Serializable {
 	/**
 	 * 显示状态[0-不显示；1-显示]
 	 */
+	@ListValue(vals = {0,1},groups = AddGroup.class)
 	private Integer showStatus;
 	/**
 	 * 检索首字母

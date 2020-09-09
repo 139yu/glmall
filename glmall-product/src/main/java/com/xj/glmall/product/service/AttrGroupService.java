@@ -2,8 +2,12 @@ package com.xj.glmall.product.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xj.glmall.common.utils.PageUtils;
+import com.xj.glmall.product.entity.AttrEntity;
 import com.xj.glmall.product.entity.AttrGroupEntity;
+import com.xj.glmall.product.vo.AttrGroupRelationVo;
+import com.xj.glmall.product.vo.AttrGroupVo;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,5 +20,11 @@ import java.util.Map;
 public interface AttrGroupService extends IService<AttrGroupEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    PageUtils queryPage(Map<String,Object> params,Long categoryId);
+
+    void deleteRelation(AttrGroupRelationVo[] attrGroupRelationVos);
+
+    List<AttrGroupVo> getAttrGroupWithAttr(Long catelogId);
 }
 

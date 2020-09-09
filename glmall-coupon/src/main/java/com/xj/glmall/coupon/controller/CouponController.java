@@ -14,11 +14,11 @@ import com.xj.glmall.common.utils.R;
 
 
 /**
- * 优惠卷表
+ * 优惠券信息
  *
  * @author yu
  * @email ${email}
- * @date 2020-06-23 23:32:29
+ * @date 2020-09-08 22:33:12
  */
 @RestController
 @RequestMapping("coupon/coupon")
@@ -29,7 +29,7 @@ public class CouponController {
     /**
      * 列表
      */
-    @RequestMapping("/list")
+    @GetMapping("/list")
     public R list(@RequestParam Map<String, Object> params){
         PageUtils page = couponService.queryPage(params);
 
@@ -50,7 +50,7 @@ public class CouponController {
     /**
      * 保存
      */
-    @RequestMapping("/save")
+    @PostMapping("/save")
     public R save(@RequestBody CouponEntity coupon){
 		couponService.save(coupon);
 
@@ -60,7 +60,7 @@ public class CouponController {
     /**
      * 修改
      */
-    @RequestMapping("/update")
+    @PostMapping("/update")
     public R update(@RequestBody CouponEntity coupon){
 		couponService.updateById(coupon);
 
@@ -70,7 +70,7 @@ public class CouponController {
     /**
      * 删除
      */
-    @RequestMapping("/delete")
+    @PostMapping("/delete")
     public R delete(@RequestBody Long[] ids){
 		couponService.removeByIds(Arrays.asList(ids));
 

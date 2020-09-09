@@ -81,7 +81,7 @@ Nacos Discovery Starter 默认集成了 Ribbon ，所以对于使用了 Ribbon �
     <artifactId>spring-cloud-starter-openfeign</artifactId>
 </dependency>
 ```
-- 在`glmall-coupon`模块下创建一个`client`包，在此包下创建`CouponFeignService`用于测试，具体代码如下：
+- 在`glmall-member`模块下创建一个`client`包，在此包下创建`CouponFeignService`用于测试，具体代码如下：
 ```java
 @FeignClient(name = "glmall-coupon")//被远程调用的服务名
 public interface CouponFeignService {
@@ -471,6 +471,116 @@ public R update(@Validated(UpdateGroup.class) @RequestBody BrandEntity brand){
 }
 ```
 在此例中，新增时它会校验id必须为空，修改时校验id不能为空
+#### 自定义校验注解
+在`glmall-common`中导入所需依赖
+```xml
+<dependency>
+    <groupId>javax.validation</groupId>
+    <artifactId>validation.api</artifactId>
+    <version>2.0.1.Final</version>
+</dependency>
+```
+以显示状态为例，值只能为0或1，0为不显示，1为显示。
+可以查看`JSR303`校验注解
+```java
+@Documented
+//指定校验器，未指定需要在初始化时指定
+@Constraint(
+    validatedBy = {}
+)
+//注解可标注位置
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.CONSTRUCTOR, ElementType.PARAMETER, ElementType.TYPE_USE})
+//合适能获取注解
+@Retention(RetentionPolicy.RUNTIME)
+public @interface NotBlank {
+    String message() default "{javax.validation.constraints.NotBlank.message}";//校验出错后取错误信息的地址
+
+    Class<?>[] groups() default {};//分组
+
+    Class<? extends Payload>[] payload() default {};//负载
+}
+```
+在`JSR303`规范中，校验注解必须要有以上注解及属性。创建`ListValue`注解类型
+```java
+@Documented
+@Constraint(
+        validatedBy = {}
+)
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.CONSTRUCTOR, ElementType.PARAMETER, ElementType.TYPE_USE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ListValue {
+    //值一般为该类的全限定类型.属性名
+    String message() default "{com.xj.glmall.product.entity.ListValue.message}";
+
+    Class<?>[] groups() default {};
+
+    Class<? extends Payload>[] payload() default {};
+}
+```
+`JSR303`的错误信息放在名为`ValidationMessage.properties`中，可以查看此文件来定义错误信息
+```properties
+javax.validation.constraints.NotBlank.message        = must not be blank
+javax.validation.constraints.NotEmpty.message        = must not be empty
+javax.validation.constraints.NotNull.message         = must not be null
+javax.validation.constraints.Null.message            = must be null
+javax.validation.constraints.Past.message            = must be a past date
+javax.validation.constraints.PastOrPresent.message   = must be a date in the past or in the present
+javax.validation.constraints.Pattern.message         = must match "{regexp}"
+```
+创建`ValidationMessage.properties`，添加如下内容
+```properties
+com.xj.glmall.common.valid.ListValue.message=必须提交指定的值
+```
+接下来定义校验器，查看`@Constraint`注解，校验器为一个`ConstraintValidator`类型的数组，它有两个泛型，第一个为要检验的注解，另一个为要校验的值的类型。这是一个接口，必须实现它。
+```java
+public interface ConstraintValidator<A extends Annotation, T> {
+
+	//初始化方法
+	default void initialize(A constraintAnnotation) {
+	}
+
+	//判断是否成功
+	boolean isValid(T value, ConstraintValidatorContext context);
+}
+
+```
+创建`ListValueConstraintValidator`，实现`ConstraintValidator`接口
+```java
+public class ListValueConstraintValidator implements ConstraintValidator<ListValue,Integer> {
+
+    //存储注解上的值
+    private Set<Integer> set = new HashSet<>();
+
+    @Override
+    public void initialize(ListValue constraintAnnotation) {
+        //获取注解上的值
+        int[] vals = constraintAnnotation.vals();
+        for (int val : vals) {
+            set.add(val);
+        }
+    }
+
+    /**
+     * 判断是否校验成功
+     * @param value 需要校验的值
+     * @param context
+     * @return
+     */
+    @Override
+    public boolean isValid(Integer value, ConstraintValidatorContext context) {
+        if (set.contains(value)) {
+            return true;
+        }
+        return false;
+    }
+}
+```
+最后，为`@ListValue`指定校验器
+```java
+@Constraint(
+        validatedBy = {ListValueConstraintValidator.class}
+)
+```
 ### 统一异常处理
 1. 编写异常处理类，在类上添加`@RestontrollerAdvice`，以json字符串返回结果
 2. 编写异常处理方法，并在方法上添加`@ExceptionHandler`注解，标注要捕获的异常
@@ -492,3 +602,8 @@ public class GlmallExceptionControllerAdvice {
 
 }
 ```
+## POJO四种类型
+- VO（View Object）：视图对象，用于展示层，它的作用是把某个指定页面（或组件）的所有数据封装起来。
+- DTO（Data Transfer Object）：数据传输对象，这个概念来源于J2EE的设计模式，原来的目的是为了EJB的分布式应用提供粗粒度的数据实体，以减少分布式调用的次数，从而提高分布式调用的性能和降低网络负载，但在这里，我泛指用于展示层与服务层之间的数据传输对象。
+- DO（Domain Object）: 领域对象，就是从现实世界中抽象出来的有形或无形的业务实体。
+- PO（PersistentObject）：持久化对象，它跟持久层（通常是关系型数据库）的数据结构形成一一对应的映射关系，如果持久层是关系型数据库，那么，数据表中的每个字段（或若干个）就对应PO的一个（或若干个）属性。

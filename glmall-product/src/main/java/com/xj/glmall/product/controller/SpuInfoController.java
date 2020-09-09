@@ -3,6 +3,7 @@ package com.xj.glmall.product.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.xj.glmall.product.vo.SpuSaveVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +32,7 @@ public class SpuInfoController {
      */
     @GetMapping("/list")
     public R list(@RequestParam Map<String, Object> params){
-        PageUtils page = spuInfoService.queryPage(params);
+        PageUtils page = spuInfoService.queryPageByCondition(params);
 
         return R.ok().put("page", page);
     }
@@ -51,8 +52,8 @@ public class SpuInfoController {
      * 保存
      */
     @PostMapping("/save")
-    public R save(@RequestBody SpuInfoEntity spuInfo){
-		spuInfoService.save(spuInfo);
+    public R save(@RequestBody SpuSaveVo spuInfo){
+		spuInfoService.saveSpuInfo(spuInfo);
 
         return R.ok();
     }

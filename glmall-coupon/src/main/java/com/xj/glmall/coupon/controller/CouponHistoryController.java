@@ -4,11 +4,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.xj.glmall.coupon.entity.CouponHistoryEntity;
 import com.xj.glmall.coupon.service.CouponHistoryService;
@@ -18,11 +14,11 @@ import com.xj.glmall.common.utils.R;
 
 
 /**
- * 优惠券使用、领取历史表
+ * 优惠券领取历史记录
  *
  * @author yu
  * @email ${email}
- * @date 2020-06-23 23:32:29
+ * @date 2020-09-08 22:33:12
  */
 @RestController
 @RequestMapping("coupon/couponhistory")
@@ -33,7 +29,7 @@ public class CouponHistoryController {
     /**
      * 列表
      */
-    @RequestMapping("/list")
+    @GetMapping("/list")
     public R list(@RequestParam Map<String, Object> params){
         PageUtils page = couponHistoryService.queryPage(params);
 
@@ -44,7 +40,7 @@ public class CouponHistoryController {
     /**
      * 信息
      */
-    @RequestMapping("/info/{id}")
+    @GetMapping("/info/{id}")
     public R info(@PathVariable("id") Long id){
 		CouponHistoryEntity couponHistory = couponHistoryService.getById(id);
 
@@ -54,7 +50,7 @@ public class CouponHistoryController {
     /**
      * 保存
      */
-    @RequestMapping("/save")
+    @PostMapping("/save")
     public R save(@RequestBody CouponHistoryEntity couponHistory){
 		couponHistoryService.save(couponHistory);
 
@@ -64,7 +60,7 @@ public class CouponHistoryController {
     /**
      * 修改
      */
-    @RequestMapping("/update")
+    @PostMapping("/update")
     public R update(@RequestBody CouponHistoryEntity couponHistory){
 		couponHistoryService.updateById(couponHistory);
 
@@ -74,7 +70,7 @@ public class CouponHistoryController {
     /**
      * 删除
      */
-    @RequestMapping("/delete")
+    @PostMapping("/delete")
     public R delete(@RequestBody Long[] ids){
 		couponHistoryService.removeByIds(Arrays.asList(ids));
 

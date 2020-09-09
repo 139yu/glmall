@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.xj.glmall.common.valid.AddGroup;
 import com.xj.glmall.common.valid.UpdateGroup;
+import com.xj.glmall.common.valid.UpdateStatusGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -66,7 +67,14 @@ public class BrandController {
      */
     @PostMapping("/update")
     public R update(@Validated(UpdateGroup.class) @RequestBody BrandEntity brand){
-		brandService.updateById(brand);
+        brandService.updateCascade(brand);
+        return R.ok();
+    }
+
+    @PostMapping("/update/status")
+    //@RequiresPermissions("product:brand:update")
+    public R updateStatus(@Validated(UpdateStatusGroup.class) @RequestBody BrandEntity brand){
+        brandService.updateById(brand);
 
         return R.ok();
     }
@@ -74,7 +82,7 @@ public class BrandController {
     /**
      * 删除
      */
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     public R delete(@RequestBody Long[] brandIds){
 		brandService.removeByIds(Arrays.asList(brandIds));
 

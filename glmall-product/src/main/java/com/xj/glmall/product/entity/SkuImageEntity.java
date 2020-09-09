@@ -9,13 +9,13 @@ import lombok.Data;
 
 /**
  * 库存单元图片表
- * 
+ *
  * @author yu
  * @email ${email}
  * @date 2020-07-02 22:57:13
  */
 @Data
-@TableName("pms_sku_image")
+@TableName("pms_sku_images")
 public class SkuImageEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -43,6 +43,6 @@ public class SkuImageEntity implements Serializable {
 	/**
 	 * 是否默认
 	 */
-	private String isDefault;
+	private Integer defaultImg;
 
 }

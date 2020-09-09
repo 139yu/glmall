@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xj.glmall.product.dao.SpuInfoDescDao">
+
+
+    <insert id="insertList">
+        insert into pms_spu_info_desc values
+        <foreach collection="list" item="desc" separator=",">
+            (#{desc.spuId},#{desc.decript})
+        </foreach>
+    </insert>
+</mapper>

@@ -30,6 +30,7 @@ public class GlmallExceptionControllerAdvice {
 
     @ExceptionHandler(value = Throwable.class)
     public R handleException(Throwable throwable){
+        LOGGER.error("错误",throwable);
         return R.error(BizCodeEnum.UNKONW_EXCEPTION.getCode(),BizCodeEnum.UNKONW_EXCEPTION.getMessage());
     }
 }
