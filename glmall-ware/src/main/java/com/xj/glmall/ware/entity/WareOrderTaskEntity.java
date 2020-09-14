@@ -8,11 +8,11 @@ import java.util.Date;
 import lombok.Data;
 
 /**
- * 库存工作单表 库存工作单表
- * 
+ * 库存工作单
+ *
  * @author yu
- * @email yu
- * @date 2020-06-24 20:15:57
+ * @email ${email}
+ * @date 2020-09-14 22:29:45
  */
 @Data
 @TableName("wms_ware_order_task")
@@ -20,14 +20,18 @@ public class WareOrderTaskEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * 编号
+	 * id
 	 */
 	@TableId
 	private Long id;
 	/**
-	 * 订单编号
+	 * order_id
 	 */
 	private Long orderId;
+	/**
+	 * order_sn
+	 */
+	private String orderSn;
 	/**
 	 * 收货人
 	 */
@@ -37,7 +41,7 @@ public class WareOrderTaskEntity implements Serializable {
 	 */
 	private String consigneeTel;
 	/**
-	 * 送货地址
+	 * 配送地址
 	 */
 	private String deliveryAddress;
 	/**
@@ -45,13 +49,13 @@ public class WareOrderTaskEntity implements Serializable {
 	 */
 	private String orderComment;
 	/**
-	 * 付款方式 1:在线付款 2:货到付款
+	 * 付款方式【 1:在线付款 2:货到付款】
 	 */
-	private String paymentWay;
+	private Integer paymentWay;
 	/**
-	 * 
+	 * 任务状态
 	 */
-	private String taskStatus;
+	private Integer taskStatus;
 	/**
 	 * 订单描述
 	 */
@@ -61,11 +65,11 @@ public class WareOrderTaskEntity implements Serializable {
 	 */
 	private String trackingNo;
 	/**
-	 * 创建时间
+	 * create_time
 	 */
 	private Date createTime;
 	/**
-	 * 仓库编号
+	 * 仓库id
 	 */
 	private Long wareId;
 	/**

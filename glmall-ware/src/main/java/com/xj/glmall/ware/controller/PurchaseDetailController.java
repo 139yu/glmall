@@ -6,32 +6,32 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.xj.glmall.ware.entity.WareOrderTaskEntity;
-import com.xj.glmall.ware.service.WareOrderTaskService;
+import com.xj.glmall.ware.entity.PurchaseDetailEntity;
+import com.xj.glmall.ware.service.PurchaseDetailService;
 import com.xj.glmall.common.utils.PageUtils;
 import com.xj.glmall.common.utils.R;
 
 
 
 /**
- * 库存工作单
+ *
  *
  * @author yu
  * @email ${email}
  * @date 2020-09-14 22:29:45
  */
 @RestController
-@RequestMapping("ware/wareordertask")
-public class WareOrderTaskController {
+@RequestMapping("ware/purchasedetail")
+public class PurchaseDetailController {
     @Autowired
-    private WareOrderTaskService wareOrderTaskService;
+    private PurchaseDetailService purchaseDetailService;
 
     /**
      * 列表
      */
     @GetMapping("/list")
     public R list(@RequestParam Map<String, Object> params){
-        PageUtils page = wareOrderTaskService.queryPage(params);
+        PageUtils page = purchaseDetailService.queryPage(params);
 
         return R.ok().put("page", page);
     }
@@ -42,17 +42,17 @@ public class WareOrderTaskController {
      */
     @GetMapping("/info/{id}")
     public R info(@PathVariable("id") Long id){
-		WareOrderTaskEntity wareOrderTask = wareOrderTaskService.getById(id);
+		PurchaseDetailEntity purchaseDetail = purchaseDetailService.getById(id);
 
-        return R.ok().put("wareOrderTask", wareOrderTask);
+        return R.ok().put("purchaseDetail", purchaseDetail);
     }
 
     /**
      * 保存
      */
     @PostMapping("/save")
-    public R save(@RequestBody WareOrderTaskEntity wareOrderTask){
-		wareOrderTaskService.save(wareOrderTask);
+    public R save(@RequestBody PurchaseDetailEntity purchaseDetail){
+		purchaseDetailService.save(purchaseDetail);
 
         return R.ok();
     }
@@ -61,8 +61,8 @@ public class WareOrderTaskController {
      * 修改
      */
     @PostMapping("/update")
-    public R update(@RequestBody WareOrderTaskEntity wareOrderTask){
-		wareOrderTaskService.updateById(wareOrderTask);
+    public R update(@RequestBody PurchaseDetailEntity purchaseDetail){
+		purchaseDetailService.updateById(purchaseDetail);
 
         return R.ok();
     }
@@ -72,7 +72,7 @@ public class WareOrderTaskController {
      */
     @PostMapping("/delete")
     public R delete(@RequestBody Long[] ids){
-		wareOrderTaskService.removeByIds(Arrays.asList(ids));
+		purchaseDetailService.removeByIds(Arrays.asList(ids));
 
         return R.ok();
     }

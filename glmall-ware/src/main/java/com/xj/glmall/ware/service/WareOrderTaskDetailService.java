@@ -7,11 +7,11 @@ import com.xj.glmall.ware.entity.WareOrderTaskDetailEntity;
 import java.util.Map;
 
 /**
- * 
+ * 库存工作单
  *
  * @author yu
- * @email yu
- * @date 2020-06-24 20:15:57
+ * @email ${email}
+ * @date 2020-09-14 22:29:45
  */
 public interface WareOrderTaskDetailService extends IService<WareOrderTaskDetailEntity> {
 

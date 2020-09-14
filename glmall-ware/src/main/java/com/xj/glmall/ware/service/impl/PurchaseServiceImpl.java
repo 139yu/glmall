@@ -8,19 +8,19 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xj.glmall.common.utils.PageUtils;
 import com.xj.glmall.common.utils.Query;
 
-import com.xj.glmall.ware.dao.WareOrderTaskDao;
-import com.xj.glmall.ware.entity.WareOrderTaskEntity;
-import com.xj.glmall.ware.service.WareOrderTaskService;
+import com.xj.glmall.ware.dao.PurchaseDao;
+import com.xj.glmall.ware.entity.PurchaseEntity;
+import com.xj.glmall.ware.service.PurchaseService;
 
 
-@Service("wareOrderTaskService")
-public class WareOrderTaskServiceImpl extends ServiceImpl<WareOrderTaskDao, WareOrderTaskEntity> implements WareOrderTaskService {
+@Service("purchaseService")
+public class PurchaseServiceImpl extends ServiceImpl<PurchaseDao, PurchaseEntity> implements PurchaseService {
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
-        IPage<WareOrderTaskEntity> page = this.page(
-                new Query<WareOrderTaskEntity>().getPage(params),
-                new QueryWrapper<WareOrderTaskEntity>()
+        IPage<PurchaseEntity> page = this.page(
+                new Query<PurchaseEntity>().getPage(params),
+                new QueryWrapper<PurchaseEntity>()
         );
 
         return new PageUtils(page);

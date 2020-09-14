@@ -4,11 +4,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.xj.glmall.ware.entity.WareSkuEntity;
 import com.xj.glmall.ware.service.WareSkuService;
@@ -18,11 +14,11 @@ import com.xj.glmall.common.utils.R;
 
 
 /**
- * 
+ * 商品库存
  *
  * @author yu
- * @email yu
- * @date 2020-06-24 20:15:57
+ * @email ${email}
+ * @date 2020-09-14 22:29:45
  */
 @RestController
 @RequestMapping("ware/waresku")
@@ -33,7 +29,7 @@ public class WareSkuController {
     /**
      * 列表
      */
-    @RequestMapping("/list")
+    @GetMapping("/list")
     public R list(@RequestParam Map<String, Object> params){
         PageUtils page = wareSkuService.queryPage(params);
 
@@ -44,7 +40,7 @@ public class WareSkuController {
     /**
      * 信息
      */
-    @RequestMapping("/info/{id}")
+    @GetMapping("/info/{id}")
     public R info(@PathVariable("id") Long id){
 		WareSkuEntity wareSku = wareSkuService.getById(id);
 
@@ -54,7 +50,7 @@ public class WareSkuController {
     /**
      * 保存
      */
-    @RequestMapping("/save")
+    @PostMapping("/save")
     public R save(@RequestBody WareSkuEntity wareSku){
 		wareSkuService.save(wareSku);
 
@@ -64,7 +60,7 @@ public class WareSkuController {
     /**
      * 修改
      */
-    @RequestMapping("/update")
+    @PostMapping("/update")
     public R update(@RequestBody WareSkuEntity wareSku){
 		wareSkuService.updateById(wareSku);
 
@@ -74,7 +70,7 @@ public class WareSkuController {
     /**
      * 删除
      */
-    @RequestMapping("/delete")
+    @PostMapping("/delete")
     public R delete(@RequestBody Long[] ids){
 		wareSkuService.removeByIds(Arrays.asList(ids));
 

@@ -8,11 +8,11 @@ import java.util.Date;
 import lombok.Data;
 
 /**
- * 
- * 
+ * 库存工作单
+ *
  * @author yu
- * @email yu
- * @date 2020-06-24 20:15:57
+ * @email ${email}
+ * @date 2020-09-14 22:29:45
  */
 @Data
 @TableName("wms_ware_order_task_detail")
@@ -20,7 +20,7 @@ public class WareOrderTaskDetailEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * 编号
+	 * id
 	 */
 	@TableId
 	private Long id;
@@ -29,20 +29,24 @@ public class WareOrderTaskDetailEntity implements Serializable {
 	 */
 	private Long skuId;
 	/**
-	 * sku名称
+	 * sku_name
 	 */
 	private String skuName;
 	/**
 	 * 购买个数
 	 */
-	private Integer skuNums;
+	private Integer skuNum;
 	/**
-	 * 工作单编号
+	 * 工作单id
 	 */
 	private Long taskId;
 	/**
-	 * 
+	 * 仓库id
 	 */
-	private Integer skuNum;
+	private Long wareId;
+	/**
+	 * 1-已锁定  2-已解锁  3-扣减
+	 */
+	private Integer lockStatus;
 
 }

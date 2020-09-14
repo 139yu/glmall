@@ -5,13 +5,13 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
- * 
- * 
+ * 仓库信息
+ *
  * @author yu
- * @email yu
- * @date 2020-06-24 20:15:57
+ * @email ${email}
+ * @date 2020-09-14 22:29:45
  */
 @Mapper
 public interface WareInfoDao extends BaseMapper<WareInfoEntity> {
-	
+
 }

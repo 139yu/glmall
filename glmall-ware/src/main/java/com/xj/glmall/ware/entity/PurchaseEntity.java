@@ -3,46 +3,63 @@ package com.xj.glmall.ware.entity;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
+import java.math.BigDecimal;
 import java.io.Serializable;
 import java.util.Date;
 import lombok.Data;
 
 /**
- * 商品库存
+ * 采购信息
  *
  * @author yu
  * @email ${email}
  * @date 2020-09-14 22:29:45
  */
 @Data
-@TableName("wms_ware_sku")
-public class WareSkuEntity implements Serializable {
+@TableName("wms_purchase")
+public class PurchaseEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * id
+	 *
 	 */
 	@TableId
 	private Long id;
 	/**
-	 * sku_id
+	 *
 	 */
-	private Long skuId;
+	private Long assigneeId;
 	/**
-	 * 仓库id
+	 *
+	 */
+	private String assigneeName;
+	/**
+	 *
+	 */
+	private String phone;
+	/**
+	 *
+	 */
+	private Integer priority;
+	/**
+	 *
+	 */
+	private Integer status;
+	/**
+	 *
 	 */
 	private Long wareId;
 	/**
-	 * 库存数
+	 *
 	 */
-	private Integer stock;
+	private BigDecimal amount;
 	/**
-	 * sku_name
+	 *
 	 */
-	private String skuName;
+	private Date createTime;
 	/**
-	 * 锁定库存
+	 *
 	 */
-	private Integer stockLocked;
+	private Date updateTime;
 
 }

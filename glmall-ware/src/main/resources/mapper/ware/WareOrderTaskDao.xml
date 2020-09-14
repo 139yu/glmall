@@ -7,6 +7,7 @@
     <resultMap type="com.xj.glmall.ware.entity.WareOrderTaskEntity" id="wareOrderTaskMap">
         <result property="id" column="id"/>
         <result property="orderId" column="order_id"/>
+        <result property="orderSn" column="order_sn"/>
         <result property="consignee" column="consignee"/>
         <result property="consigneeTel" column="consignee_tel"/>
         <result property="deliveryAddress" column="delivery_address"/>
