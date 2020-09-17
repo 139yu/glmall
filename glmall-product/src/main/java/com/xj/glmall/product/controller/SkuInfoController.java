@@ -3,6 +3,7 @@ package com.xj.glmall.product.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.xj.glmall.common.to.SkuInfoTo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,6 +43,8 @@ public class SkuInfoController {
      */
     @GetMapping("/info/{skuId}")
     public R info(@PathVariable("skuId") Long skuId){
+
+        System.out.println(skuId);
 		SkuInfoEntity skuInfo = skuInfoService.getById(skuId);
 
         return R.ok().put("skuInfo", skuInfo);
@@ -66,7 +69,11 @@ public class SkuInfoController {
 
         return R.ok();
     }
-
+    @PostMapping("setSaleCount")
+    public R setSaleCount(@RequestBody SkuInfoTo to){
+        skuInfoService.setSaleCount(to);
+        return R.ok();
+    }
     /**
      * 删除
      */

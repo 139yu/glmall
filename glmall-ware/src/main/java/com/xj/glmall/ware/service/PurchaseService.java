@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.xj.glmall.common.utils.PageUtils;
 import com.xj.glmall.ware.entity.PurchaseEntity;
 import com.xj.glmall.ware.vo.MergeVo;
+import com.xj.glmall.ware.vo.PurchaseDoneVo;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,8 +20,12 @@ public interface PurchaseService extends IService<PurchaseEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
 
-    PageUtils queryUnreceiveListPage(Map<String, Object> params);
+    PageUtils queryUnReceiveListPage(Map<String, Object> params);
 
     void merge(MergeVo mergeVo);
+
+    void receivedPurchase(List<Long> ids);
+
+    void finishPurchase(PurchaseDoneVo vo);
 }
 

@@ -1,8 +1,11 @@
 package com.xj.glmall.product.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
+import com.xj.glmall.product.entity.ProductAttrValueEntity;
+import com.xj.glmall.product.service.ProductAttrValueService;
 import com.xj.glmall.product.vo.AttrRespVo;
 import com.xj.glmall.product.vo.AttrVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +31,30 @@ public class AttrController {
     @Autowired
     private AttrService attrService;
 
+    @Autowired
+    private ProductAttrValueService productAttrValueService;
+
+    /**
+     * 修改商品规格
+     */
+    @PostMapping("/update/{spuId}")
+    public R updateProductAttrValueBySkuId(@PathVariable("spuId") Long spuId,@RequestBody List<ProductAttrValueEntity> productAttrValueEntities) {
+        productAttrValueService.updateProductAttrValueBySpuId(spuId,productAttrValueEntities);
+        return R.ok();
+    }
+
+    /**
+     * 获取spu规格
+     */
+    @GetMapping("/base/listforspu/{spuId}")
+    public R baseAttrListForSpuId(@PathVariable("spuId") Long spuId) {
+        List<ProductAttrValueEntity> data = productAttrValueService.baseAttrListForSpuId(spuId);
+        return R.ok().put("data",data);
+    }
+
     /**
      * 列表
      */
-
     @GetMapping("/list")
     public R list(@RequestParam Map<String, Object> params){
         PageUtils page = attrService.queryPage(params);

@@ -1,5 +1,6 @@
 package com.xj.glmall.product.service.impl;
 
+import com.xj.glmall.common.to.SkuInfoTo;
 import com.xj.glmall.product.vo.Skus;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -72,6 +73,11 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
                 wrapper
         );
         return new PageUtils(page);
+    }
+
+    @Override
+    public void setSaleCount(SkuInfoTo to) {
+        this.baseMapper.setSaleCount(to.getSkuId(),to.getSaleCount());
     }
 
 

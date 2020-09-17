@@ -5,16 +5,21 @@
 
 	<!-- 可根据自己的需求，是否要使用 -->
     <resultMap type="com.xj.glmall.product.entity.SkuInfoEntity" id="skuInfoMap">
-        <result property="id" column="id"/>
-        <result property="productId" column="product_id"/>
+        <result property="skuId" column="sku_id"/>
+        <result property="spuId" column="spu_id"/>
         <result property="price" column="price"/>
         <result property="skuName" column="sku_name"/>
         <result property="skuDesc" column="sku_desc"/>
-        <result property="weight" column="weight"/>
-        <result property="tmId" column="tm_id"/>
-        <result property="catalog3Id" column="catalog3_id"/>
+        <result property="brandId" column="brand_id"/>
         <result property="skuDefaultImg" column="sku_default_img"/>
+        <result property="skuSubtitle" column="sku_subtitle"/>
+        <result property="saleCount" column="sale_count"/>
+        <result property="catalogId" column="catalog_id"/>
+        <result property="skuTitle" column="sku_title"/>
     </resultMap>
+    <update id="setSaleCount">
+        update psm_sku_info set sale_count = sale_count + #{saleCount} where sku_id = #{skuId}
+    </update>
 
 
 </mapper>

@@ -1,6 +1,7 @@
 package com.xj.glmall.product.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xj.glmall.common.to.SkuInfoTo;
 import com.xj.glmall.common.utils.PageUtils;
 import com.xj.glmall.product.entity.SkuInfoEntity;
 import com.xj.glmall.product.vo.Skus;
@@ -22,5 +23,7 @@ public interface SkuInfoService extends IService<SkuInfoEntity> {
     void saveSkuInfo(SkuInfoEntity skuInfoEntity);
 
     PageUtils queryPageByCondition(Map<String, Object> params);
+
+    void setSaleCount(SkuInfoTo to);
 }
 

@@ -2,9 +2,11 @@ package com.xj.glmall.ware.controller;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import com.xj.glmall.ware.vo.MergeVo;
+import com.xj.glmall.ware.vo.PurchaseDoneVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,6 +39,21 @@ public class PurchaseController {
     }
 
     /**
+     * 完成采购
+     * @param
+     * @return
+     */
+    @PostMapping("/done")
+    public R finishPurchase(@RequestBody PurchaseDoneVo vo){
+        purchaseService.finishPurchase(vo);
+        return R.ok();
+    }
+    @PostMapping("/received")
+    public R receivedPurchase(@RequestBody List<Long> ids){
+        purchaseService.receivedPurchase(ids);
+        return R.ok();
+    }
+    /**
      * 列表
      */
     @GetMapping("/list")
@@ -48,7 +65,7 @@ public class PurchaseController {
     ///ware/purchase/unreceive/list
     @GetMapping("/unreceive/list")
     public R unreceiveList(@RequestParam Map<String, Object> params){
-        PageUtils page = purchaseService.queryUnreceiveListPage(params);
+        PageUtils page = purchaseService.queryUnReceiveListPage(params);
 
         return R.ok().put("page", page);
     }

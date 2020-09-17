@@ -1,4 +1,4 @@
-package com.xj.glmall.product.config;
+package com.xj.glmall.ware.config;
 
 import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.pagination.optimize.JsqlParserCountOptimize;
@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
-@MapperScan("com.xj.glmall.product.dao")
+@MapperScan("com.xj.glmall.ware.dao")
 @EnableTransactionManagement
 public class MybatisPlusConfig {
 
