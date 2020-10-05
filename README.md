@@ -760,3 +760,103 @@ chmod -R 777 /mydata/elasticsearch
 ```shell script
 docker pull kibana:7.4.2
 ```
+2.启动容器
+```shell script
+docker run --name kibana -e ELASTICSEARCH_HOSTS=http://ip:9200 -p 5601:5601 -d kibana:7.4.2
+```
+## ES学习
+
+### ES入门
+1. `_cat`介绍
+- GET /_cat/nodes：查看所有节点
+- GET /_cat/health：查看es健康情况
+- GET /_cat/master：查看主节点
+- GET /_cat/indices：查看所有索引 
+2. 索引一个文档（保存）
+- PUT(POST) /customer/external/1
+customer索引，类似于MySQL的数据库，external类型，类似于数据库的表，1为id（唯一标识）
+例：`http://106.55.2.133:9200/customer/external/1`
+```json
+{
+    "name":"test",
+    "age": 12,
+    "gender": "0"
+}
+```
+向该链接发送put(post)请求，上面为请求的json格式的数据，返回的数据如下
+![](./assets/1601908715(1).png)
+同样的请求发送多次会变为更新操作，`result`字段的值会变为“update”，`_version`值会加1。如果不指定唯一标识，es会自动生成，并返回。如果用put请求，必须带上id
+3. 查询文档
+- GET /customer/external/1 查询id为1的文档，返回值如下：
+![](./assets/1601909901(1).png)
+4. 乐观锁修改
+使用post（put）修改文档时，带上`_seq_no`和`_primary_term`的值，该值只能是当前文档最新的值。如果有两个请求带着这两个值修改当前文档，第一个请求修改成功了，`_seq_no`的值就会自增1，另一个请求如果要修改必须是已更新的`_seq_no`或`_primary_term`的值，请求如下：
+POST http://106.55.2.133:9200/customer/external/1?if_seq_no=2&if_primary_term=1
+```json
+{
+    "name":"jone",
+    "age": 12,
+    "gender": 1
+}
+```          
+返回值：
+![](./assets/1601910999(1).jpg)
+5. 更新数据
+- POST http://106.55.2.133:9200/customer/external/1/_update
+```json
+{
+    "doc":{
+        "name":"jone",
+        "age": 12,
+        "gender": 1
+     }
+}
+```
+该请求会对比原来数据，如果数据没有改变，本版号不更新
+- POST(PUT) http://106.55.2.133:9200/customer/external/1
+```json
+{
+    "name":"jone",
+    "age": 12,
+    "gender": 1
+}
+```
+该请求不会检查原数据，版本号始终会自增1
+6. 删除索引&文档
+- DELETE http://106.55.2.133:9200/customer 删除索引
+
+- DELETE http://106.55.2.133:9200/customer/external/1删除文档
+查询已删除文档
+![](./assets/1601911777(1).jpg)
+查询已删除索引
+![](./assets/1601911843(1).jpg)
+7. bulk批量操作api
+语法格式
+```text
+{action:{metadata}}\n
+{request body}\n
+{action:{metadata}}\n
+{request body}\n
+```
+- 批量新增实例
+POST /customer/external/_bulk
+```text
+{"index":{"_id":1}}
+{"name":"test1"}
+{"index":{"_id":2}}
+{"name":"test2"}
+```
+两行为一次操作，第一行为添加数据的id，第二行为添加的数据。每个操作互不影响
+- 复杂实例
+POST  /_bulk
+```text
+{"delete":{"_index":"website","_type":"blog","_id":"123"}}
+{"create":{"_index":"website","_type":"blog","_id":"123"}}
+{"title":"my first blog post"}
+{"index":{"_index":"website","type":"blog"}}
+{"title":"my second blog post"}
+{"update":{"_index":"website","_type":"blog","_id":"123"}}
+{"doc":{"title": "update my blog post"}}
+```
+删除没有请求体，所以只有一行
+8. [批量导入测试数据](https://github.com/elastic/elasticsearch/blob/master/docs/src/test/resources/accounts.json)
