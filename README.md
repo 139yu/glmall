@@ -607,7 +607,9 @@ public class GlmallExceptionControllerAdvice {
 - DTO（Data Transfer Object）：数据传输对象，这个概念来源于J2EE的设计模式，原来的目的是为了EJB的分布式应用提供粗粒度的数据实体，以减少分布式调用的次数，从而提高分布式调用的性能和降低网络负载，但在这里，我泛指用于展示层与服务层之间的数据传输对象。
 - DO（Domain Object）: 领域对象，就是从现实世界中抽象出来的有形或无形的业务实体。
 - PO（PersistentObject）：持久化对象，它跟持久层（通常是关系型数据库）的数据结构形成一一对应的映射关系，如果持久层是关系型数据库，那么，数据表中的每个字段（或若干个）就对应PO的一个（或若干个）属性。
-# linux 安装Java
+# linux环境搭建
+
+## linux 安装Java
 1.查看本地是否自带Java环境
 ```shell script
 yum list installed | grep java
@@ -644,15 +646,91 @@ source /etc/profile
 ```shell script
 yum install glibc.i686
 ```
-# 安装elasticsearch
+## 安装maven
+1.下载[maven](https://downloads.apache.org/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz)
+2.将下载的maven通过xshell上传到linux
+3.解压
+```shell script
+tar -zxvf apache-maven-3.6.3-bin.tar.gz
+```
+4.将解压好的文件移动到`/opt/maven`目录下
+```shell script
+mv /apache-maven-3.6.3 /opt/maven
+```
+5.配置环境变量
+```shell script
+vi /etc/profile
+# 将一下内容添加到profile文件
+export MAVEN_HOME=/opt/maven
+export PATH=$MAVEN_HOME/bin:$PATH
+```
+6.重新加载配置文件
+```shell script
+source /etc/profile
+```
+## 安装redis
+1.使用`wget`下载redis
+```shell script
+wget http://download.redis.io/releases/redis-4.0.8.tar.gz
+```
+2.解压redis
+```shell script
+tar -zxvf redis-4.0.8.tar.gz
+```
+3.将redis移动到`/usr/local/redis/`目录下
+```shell script
+mv redis-4.0.8 /usr/local/redis
+```
+4.切换到`/usr/local/redis`目录下，执行`make`命令编译redis
+```shell script
+cd /usr/local/redis
+make
+```
+5.切换到`src`目录下，安装redis
+```shell script
+cd /usr/local/redis/src
+make install PREFIX=/usr/local/redis
+```
+6.配置redis为后台启动
+```shell script
+vi /usr/local/redis/etc/redis.conf #将daemonize no 改成daemonize yes
+```
+7.将redis加入到开机启动
+```shell script
+vi /etc/rc.local #在里面添加内容：/usr/local/redis/bin/redis-server /usr/local/redis/etc/redis.conf (意思就是开机调用这段开启redis的命令)
+```
+8.开启redis
+```shell script
+/usr/local/redis/bin/redis-server /usr/local/redis/etc/redis.conf
+```
+遇到问题：
+1.编译失败，提示有两个错误,解决办法：
+执行以下命令
+```shell script
+yum install cpp
+yum install binutils
+yum install glibc
+yum install glibc-kernheaders
+yum install glibc-common
+yum install glibc-devel
+yum install gcc
+yum install make
+```
+2.提示`fatal error: jemalloc/jemalloc.h: No such file or directory`，解决办法：
+执行以下命令:
+```shell script
+make MALLOC=libc
+```
+
+## 安装elasticsearch
 拉取es镜像
 ```shell script
 docker pull elasticsearch:7.4.2
 ```
 创建文件夹，用来挂载docker容器中es的配置及数据
 ```shell script
-mkdir /mydata/elasticsearch/config
-mkdir /mydata/elasticsearch/data
+mkdir -p /mydata/elasticsearch/config
+mkdir -p /mydata/elasticsearch/data
 echo "http.host:0.0.0.0">>/mydata/elasticsearch/config/elasticsearch.yml  #将内容输出到elasticsearch.yml文件中
 ```
 启动容器
@@ -669,4 +747,16 @@ docker run --name elasticsearch -p 9200:9200 -p 9300:9300 \
 # -e："discovery.type=single-node"->以单节点启动，ES_JAVA_OPS="-Xms64 -Xms128m"->初始暂用内存64m，最大占用内存128m
 # -v：挂载目录
 # -d：后台运行容器，并返回容器ID
+```
+遇到问题：
+1.没有`/mydata/elasticsearch`目录的读写执行权限，解决方法：设置所有用户都有该目录的读写执行权限
+```shell script
+chmod -R 777 /mydata/elasticsearch
+# -R：递归执行
+```
+
+## 安装kibana
+1.拉取镜像
+```shell script
+docker pull kibana:7.4.2
 ```
