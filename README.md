@@ -860,3 +860,76 @@ POST  /_bulk
 ```
 删除没有请求体，所以只有一行
 8. [批量导入测试数据](https://github.com/elastic/elasticsearch/blob/master/docs/src/test/resources/accounts.json)
+9. 检索
+查看[elastic中文文档](https://www.kancloud.cn/yiyanan/elasticsearch_7_6/1668542)
+1). `query`：定制查询条件
+a. `match_all`:查询所有
+```json
+{
+  "query": {
+    "match_all": {}
+  }
+}
+```
+b. `match`：查询`address`字段中含有`Rockwell`或`Place`的数据
+```json
+{
+  "query": {
+    "match": {
+      "address": "Rockwell Place"
+    }
+  }
+}
+```
+c. `match_phrase`：查询`address`字段中含有`Rockwell Place`的数据
+```json
+{
+  "query": {
+    "match_phrase": {
+      "address": "Rockwell Place"
+    }
+  }
+}
+```
+d. `multi_match`：查询`firstname`字段或`address`字段包含`Ferry`或`Jenkins`的数据
+```json
+{
+  "query": {
+    "multi_match": {
+      "query": "Ferry Jenkins",
+      "fields": ["firstname","address"]
+    }
+  }
+}
+```
+2). `from`和`size`：用于分页，每页显示10条数据，从第二页开始显示。起始页from值为0
+```json
+{
+  "query": {
+    "match": {
+      "address": "Rockwell Place"
+    }
+  },
+  "from": 1,
+  "size": 10
+}
+```
+3). `sort`：值是一个数组，指定排序字段
+```json
+{
+  "query": {
+    "match": {
+      "address": "Rockwell Place"
+    }
+  },
+  "from": 1,
+  "size": 10,
+  "sort": [
+    {
+      "age": {
+        "order": "asc"
+      }
+    }
+  ]
+}
+```
