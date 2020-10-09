@@ -775,7 +775,7 @@ docker run --name kibana -e ELASTICSEARCH_HOSTS=http://ip:9200 -p 5601:5601 -d k
 2. 索引一个文档（保存）
 - PUT(POST) /customer/external/1
 customer索引，类似于MySQL的数据库，external类型，类似于数据库的表，1为id（唯一标识）
-例：`http://106.55.2.133:9200/customer/external/1`
+例：`http://127.0.0.1:9200/customer/external/1`
 ```json
 {
     "name":"test",
@@ -791,7 +791,7 @@ customer索引，类似于MySQL的数据库，external类型，类似于数据�
 ![](./assets/1601909901(1).png)
 4. 乐观锁修改
 使用post（put）修改文档时，带上`_seq_no`和`_primary_term`的值，该值只能是当前文档最新的值。如果有两个请求带着这两个值修改当前文档，第一个请求修改成功了，`_seq_no`的值就会自增1，另一个请求如果要修改必须是已更新的`_seq_no`或`_primary_term`的值，请求如下：
-POST http://106.55.2.133:9200/customer/external/1?if_seq_no=2&if_primary_term=1
+POST http://127.0.0.1:9200/customer/external/1?if_seq_no=2&if_primary_term=1
 ```json
 {
     "name":"jone",
@@ -802,7 +802,7 @@ POST http://106.55.2.133:9200/customer/external/1?if_seq_no=2&if_primary_term=1
 返回值：
 ![](./assets/1601910999(1).jpg)
 5. 更新数据
-- POST http://106.55.2.133:9200/customer/external/1/_update
+- POST http://127.0.0.1:9200/customer/external/1/_update
 ```json
 {
     "doc":{
@@ -813,7 +813,7 @@ POST http://106.55.2.133:9200/customer/external/1?if_seq_no=2&if_primary_term=1
 }
 ```
 该请求会对比原来数据，如果数据没有改变，本版号不更新
-- POST(PUT) http://106.55.2.133:9200/customer/external/1
+- POST(PUT) http://127.0.0.1:9200/customer/external/1
 ```json
 {
     "name":"jone",
@@ -823,9 +823,9 @@ POST http://106.55.2.133:9200/customer/external/1?if_seq_no=2&if_primary_term=1
 ```
 该请求不会检查原数据，版本号始终会自增1
 6. 删除索引&文档
-- DELETE http://106.55.2.133:9200/customer 删除索引
+- DELETE http://127.0.0.1:9200/customer 删除索引
 
-- DELETE http://106.55.2.133:9200/customer/external/1删除文档
+- DELETE http://127.0.0.1:9200/customer/external/1删除文档
 查询已删除文档
 ![](./assets/1601911777(1).jpg)
 查询已删除索引
@@ -902,6 +902,22 @@ d. `multi_match`：查询`firstname`字段或`address`字段包含`Ferry`或`Jen
   }
 }
 ```
+e. `bool`：组合多个条件查询。
+- must：必须匹配
+- must_not：必须不匹配
+- should：期望匹配，不匹配也可，若满足，相关性得分会更高
+f. 'filter'：过滤，不会计算相关性得分
+g. 'term'：多用于匹配非text字段的精确查询，多个单词的精确值无法匹配，语法与match相同
+h. 'FIELD.keyword'：用于精确匹配,如下，匹配address为"880 Holmes Lane"的数据
+```json
+{
+  "query": {
+    "match": {
+      "address.keyword": "880 Holmes Lane"
+    }
+  }
+}
+```
 2). `from`和`size`：用于分页，每页显示10条数据，从第二页开始显示。起始页from值为0
 ```json
 {
@@ -931,5 +947,99 @@ d. `multi_match`：查询`firstname`字段或`address`字段包含`Ferry`或`Jen
       }
     }
   ]
+}
+```
+4). `_source`：指定显示哪些字段，值为数组
+10. aggs：聚合，对已查询到的数据进行分析。可以有多个聚合，对已聚合和的数据可以内嵌聚合。参考[官方文档](https://www.elastic.co/guide/en/elasticsearch/reference/7.x/search-aggregations.html)
+1). 查询每个年龄的人数
+```json
+{
+  "query": {"match_all": {}},
+  "aggs": {
+    "age_aggs": {
+      "terms": {
+        "field": "age",
+        "size": 10
+      }
+    }
+  }
+}
+```
+2). 查询每个年龄的人数与年龄的平均值
+```json
+{
+  "query": {"match_all": {}},
+  "aggs": {
+    "age_aggs": {
+      "terms": {
+        "field": "age",
+        "size": 10
+      }
+    },
+    "age_avg":{
+      "avg": {
+        "field": "age"
+      }
+    }
+  }
+}
+```
+3). 查询每个年龄段的平均工资
+```json
+{
+  "query": {
+    "match_all": {}
+  },
+  "aggs": {
+    "age_aggs": {
+      "terms": {
+        "field": "age",
+        "size": 10
+      },
+      "aggs": {
+        "balance_avg": {
+          "avg": {
+            "field": "balance"
+          }
+        }
+      }
+    }
+  },
+  "size": 0
+}
+```
+4). 查出所有年龄分布，并且这些年龄段中的男性和女性的平均薪资以及这个年龄段总体的平均薪资。（text字段聚合需要使用FIELD.keyword）
+```json
+{
+  "query": {"match_all": {}},
+  "aggs": {
+    "age_aggs": {
+      "terms": {
+        "field": "age",
+        "size": 100
+      },
+      "aggs": {
+        "gender_aggs": {
+          "terms": {
+            "field": "gender.keyword",
+            "size": 100
+          },
+          "aggs": {
+            "balance_avg": {
+              "avg": {
+                "field": "balance"
+              }
+            }
+          }
+        },
+        "balance_avg": {
+          "avg": {
+            "field": "balance"
+          }
+        }
+      }
+    }
+  },
+  "size": 0
 }
 ```
