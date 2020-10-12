@@ -830,7 +830,8 @@ POST http://127.0.0.1:9200/customer/external/1?if_seq_no=2&if_primary_term=1
 ![](./assets/1601911777(1).jpg)
 查询已删除索引
 ![](./assets/1601911843(1).jpg)
-7. bulk批量操作api
+### 进阶
+1. bulk批量操作api
 语法格式
 ```text
 {action:{metadata}}\n
@@ -859,11 +860,11 @@ POST  /_bulk
 {"doc":{"title": "update my blog post"}}
 ```
 删除没有请求体，所以只有一行
-8. [批量导入测试数据](https://github.com/elastic/elasticsearch/blob/master/docs/src/test/resources/accounts.json)
-9. 检索
+2. [批量导入测试数据](https://github.com/elastic/elasticsearch/blob/master/docs/src/test/resources/accounts.json)
+3. 检索
 查看[elastic中文文档](https://www.kancloud.cn/yiyanan/elasticsearch_7_6/1668542)
-1). `query`：定制查询条件
-a. `match_all`:查询所有
+- `query`：定制查询条件
+1). `match_all`:查询所有
 ```json
 {
   "query": {
@@ -871,7 +872,7 @@ a. `match_all`:查询所有
   }
 }
 ```
-b. `match`：查询`address`字段中含有`Rockwell`或`Place`的数据
+2). `match`：查询`address`字段中含有`Rockwell`或`Place`的数据
 ```json
 {
   "query": {
@@ -881,7 +882,7 @@ b. `match`：查询`address`字段中含有`Rockwell`或`Place`的数据
   }
 }
 ```
-c. `match_phrase`：查询`address`字段中含有`Rockwell Place`的数据
+3). `match_phrase`：查询`address`字段中含有`Rockwell Place`的数据
 ```json
 {
   "query": {
@@ -891,7 +892,7 @@ c. `match_phrase`：查询`address`字段中含有`Rockwell Place`的数据
   }
 }
 ```
-d. `multi_match`：查询`firstname`字段或`address`字段包含`Ferry`或`Jenkins`的数据
+4). `multi_match`：查询`firstname`字段或`address`字段包含`Ferry`或`Jenkins`的数据
 ```json
 {
   "query": {
@@ -902,13 +903,13 @@ d. `multi_match`：查询`firstname`字段或`address`字段包含`Ferry`或`Jen
   }
 }
 ```
-e. `bool`：组合多个条件查询。
-- must：必须匹配
-- must_not：必须不匹配
-- should：期望匹配，不匹配也可，若满足，相关性得分会更高
-f. 'filter'：过滤，不会计算相关性得分
-g. 'term'：多用于匹配非text字段的精确查询，多个单词的精确值无法匹配，语法与match相同
-h. 'FIELD.keyword'：用于精确匹配,如下，匹配address为"880 Holmes Lane"的数据
+5). `bool`：组合多个条件查询。
+a. must：必须匹配
+b. must_not：必须不匹配
+c. should：期望匹配，不匹配也可，若满足，相关性得分会更高
+6). 'filter'：过滤，不会计算相关性得分
+7). 'term'：多用于匹配非text字段的精确查询，多个单词的精确值无法匹配，语法与match相同
+8). 'FIELD.keyword'：用于精确匹配,如下，匹配address为"880 Holmes Lane"的数据
 ```json
 {
   "query": {
@@ -918,7 +919,7 @@ h. 'FIELD.keyword'：用于精确匹配,如下，匹配address为"880 Holmes Lan
   }
 }
 ```
-2). `from`和`size`：用于分页，每页显示10条数据，从第二页开始显示。起始页from值为0
+- `from`和`size`：用于分页，每页显示10条数据，从第二页开始显示。起始页from值为0
 ```json
 {
   "query": {
@@ -930,7 +931,7 @@ h. 'FIELD.keyword'：用于精确匹配,如下，匹配address为"880 Holmes Lan
   "size": 10
 }
 ```
-3). `sort`：值是一个数组，指定排序字段
+- `sort`：值是一个数组，指定排序字段
 ```json
 {
   "query": {
@@ -949,9 +950,10 @@ h. 'FIELD.keyword'：用于精确匹配,如下，匹配address为"880 Holmes Lan
   ]
 }
 ```
-4). `_source`：指定显示哪些字段，值为数组
-10. aggs：聚合，对已查询到的数据进行分析。可以有多个聚合，对已聚合和的数据可以内嵌聚合。参考[官方文档](https://www.elastic.co/guide/en/elasticsearch/reference/7.x/search-aggregations.html)
-1). 查询每个年龄的人数
+- `_source`：指定显示哪些字段，值为数组
+#### 聚合
+aggs：聚合，对已查询到的数据进行分析。可以有多个聚合，对已聚合和的数据可以内嵌聚合。参考[官方文档](https://www.elastic.co/guide/en/elasticsearch/reference/7.x/search-aggregations.html)
+- 查询每个年龄的人数
 ```json
 {
   "query": {"match_all": {}},
@@ -965,7 +967,7 @@ h. 'FIELD.keyword'：用于精确匹配,如下，匹配address为"880 Holmes Lan
   }
 }
 ```
-2). 查询每个年龄的人数与年龄的平均值
+- 查询每个年龄的人数与年龄的平均值
 ```json
 {
   "query": {"match_all": {}},
@@ -984,7 +986,7 @@ h. 'FIELD.keyword'：用于精确匹配,如下，匹配address为"880 Holmes Lan
   }
 }
 ```
-3). 查询每个年龄段的平均工资
+- 查询每个年龄段的平均工资
 ```json
 {
   "query": {
@@ -1008,7 +1010,7 @@ h. 'FIELD.keyword'：用于精确匹配,如下，匹配address为"880 Holmes Lan
   "size": 0
 }
 ```
-4). 查出所有年龄分布，并且这些年龄段中的男性和女性的平均薪资以及这个年龄段总体的平均薪资。（text字段聚合需要使用FIELD.keyword）
+- 查出所有年龄分布，并且这些年龄段中的男性和女性的平均薪资以及这个年龄段总体的平均薪资。（text字段聚合需要使用FIELD.keyword）
 ```json
 {
   "query": {"match_all": {}},
@@ -1043,8 +1045,315 @@ h. 'FIELD.keyword'：用于精确匹配,如下，匹配address为"880 Holmes Lan
   "size": 0
 }
 ```
-11. 映射
+#### 映射
 在创建索引时，可以预先定义字段的类型（映射类型，也就是type，一个索引可以有一个或多个类型）及相关属性。
+
+es字段有哪些类型可查看[文档](https://www.elastic.co/guide/en/elasticsearch/reference/7.x/mapping-types.html)
+
 通过向`http://127.0.0.1:9200/brank/_mapping`发送GET请求可以获取到`brank`索引的映射信息，获取到的部分映射信息如下：
 ![](./assets/asdfas.png)
+
 可以看到数值类型字段会被es解析成`long`类型，文本类型被解析成`text`类型。文本类型有个内置字段keyword，es不会对它进行分析，只有完全匹配才能搜索到
+
+在创建索引前预定字段类型需要向es发送PUT请求：`http://l27.0.0.1:9200/test_index`,`test_index`是索引，请求数据如下：
+```json
+{
+  "mappings": {
+    "properties": {
+      "age": {
+        "type": "integer"
+      },
+      "email": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "text"
+      }
+    }
+  }
+}
+```
+已添加的索引不能修改，只能向索引中添加索引，发送PUT请求：`http://l27.0.0.1:9200/test_index/_mapping`，请求数据如下：
+```json
+{
+  "properties":{
+    "employee_id": {
+      "type": "keyword",
+      "index": false
+    }
+  }
+}
+```
+此内容为为索引`test_index`添加一个`employee_id`映射，类型为`keywork`，这个类型不能被分析，只能精确匹配，`index`为flase表示此字段不会被索引，该值默认为true，即不能用于检索。。
+
+更多信息查看[文档](https://www.elastic.co/guide/en/elasticsearch/reference/7.x/mapping-params.html)
+
+#### 更新映射
+更新已存在的映射就必须创建新的索引，然后进行数据迁移。已`bank`索引为例，新建一个索引`newbank`，并预先定义字段映射
+PUT /newbank
+```json
+{
+  "mappings": {
+    "properties" : {
+        "account_number" : {
+          "type" : "long"
+        },
+        "address" : {
+          "type" : "text"
+        },
+        "age" : {
+          "type" : "integer"
+        },
+        "balance" : {
+          "type" : "long"
+        },
+        "city" : {
+          "type" : "text"
+        },
+        "email" : {
+          "type" : "keyword"
+        },
+        "employer" : {
+          "type" : "keyword"
+        },
+        "firstname" : {
+          "type" : "text"
+        },
+        "gender" : {
+          "type" : "keyword"
+        },
+        "lastname" : {
+          "type" : "text"
+        },
+        "state" : {
+          "type" : "keyword"
+        }
+      }
+    }
+  }
+```
+创建好索引后在进行数据迁移，固定语法为：
+POST _reindex
+```json
+{
+  "source": {
+    "index": "my-index-000001"
+  },
+  "dest": {
+    "index": "my-new-index-000001"
+  }
+}
+```
+将`bank`索引的内容迁移到`newbank`索引
+```json
+{
+  "source": {
+    "index": "bank",
+    "type": "account"
+  },
+  "dest": {
+    "index": "newbank"
+  }
+}
+```
+因为在创建`bank`索引时使用了`type`，所以迁移的时候加上了`type`，但是`type`即将被废弃，现在也可以不使用`type`。参考[文档](https://www.elastic.co/guide/en/elasticsearch/reference/7.x/docs-reindex.html)
+
+### 分词
+es通过分词器接受一个字符流，将它分割成一个个单词，然后用这些单词进行匹配。es使用的标准分词器，是将英语按照空格分割成一个个单词，将中文分割成一个个汉字，如下：
+POST _analyze
+```json
+{
+  "analyzer": "standard",
+  "text": "what do you say? my english is not good.哈哈"
+}
+```
+返回结果：
+```json
+{
+  "tokens" : [
+    {
+      "token" : "what",
+      "start_offset" : 0,
+      "end_offset" : 4,
+      "type" : "<ALPHANUM>",
+      "position" : 0
+    },
+    {
+      "token" : "do",
+      "start_offset" : 5,
+      "end_offset" : 7,
+      "type" : "<ALPHANUM>",
+      "position" : 1
+    },
+    {
+      "token" : "you",
+      "start_offset" : 8,
+      "end_offset" : 11,
+      "type" : "<ALPHANUM>",
+      "position" : 2
+    },
+    {
+      "token" : "say",
+      "start_offset" : 12,
+      "end_offset" : 15,
+      "type" : "<ALPHANUM>",
+      "position" : 3
+    },
+    {
+      "token" : "my",
+      "start_offset" : 17,
+      "end_offset" : 19,
+      "type" : "<ALPHANUM>",
+      "position" : 4
+    },
+    {
+      "token" : "english",
+      "start_offset" : 20,
+      "end_offset" : 27,
+      "type" : "<ALPHANUM>",
+      "position" : 5
+    },
+    {
+      "token" : "is",
+      "start_offset" : 28,
+      "end_offset" : 30,
+      "type" : "<ALPHANUM>",
+      "position" : 6
+    },
+    {
+      "token" : "not",
+      "start_offset" : 31,
+      "end_offset" : 34,
+      "type" : "<ALPHANUM>",
+      "position" : 7
+    },
+    {
+      "token" : "good",
+      "start_offset" : 35,
+      "end_offset" : 39,
+      "type" : "<ALPHANUM>",
+      "position" : 8
+    },
+    {
+      "token" : "哈",
+      "start_offset" : 40,
+      "end_offset" : 41,
+      "type" : "<IDEOGRAPHIC>",
+      "position" : 9
+    },
+    {
+      "token" : "哈",
+      "start_offset" : 41,
+      "end_offset" : 42,
+      "type" : "<IDEOGRAPHIC>",
+      "position" : 10
+    }
+  ]
+}
+```
+要对中文分词需要额外安装ik分词器。
+Windows下安装ik分词器：
+1. 下载ik分词器[下载地址](https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.4.2/elasticsearch-analysis-ik-7.4.2.zip)
+2. 在es安装目录下的`plugins`目录下新建一个analysis-ik目录，将解压好的文件全部复制到此目录下
+3. 重启es及kibana
+Linux下安装ik分词器：
+1. 第一步还是下载好ik分词器
+2. 若es使用docker安装的，并且没有将文件挂载到本地目录，则需要进入容器内部
+```shell script
+docker exec -it elasticsearch /bin/bash
+```
+3. 进入到plugins目录：`cd plugins`，创建ik目录：`mkdir ik`,将ik分词器的文件复制到此目录
+4. 若已将对应目录挂载到了本地目录，则直接将文件复制到对应目录
+5. 重启es及kibana
+```shell script
+docker restart elasticsearch
+docker restart kibana
+```
+ik分词器有两种，`ik_smart`只能分词和`ik_max_word`
+`ik_smart`分词器使用：
+POST _analyze
+```json
+{
+  "analyzer": "ik_smart",
+  "text":"这是ik分词器"
+}
+```
+返回结果：
+```json
+{
+  "tokens" : [
+    {
+      "token" : "这是",
+      "start_offset" : 0,
+      "end_offset" : 2,
+      "type" : "CN_WORD",
+      "position" : 0
+    },
+    {
+      "token" : "ik",
+      "start_offset" : 2,
+      "end_offset" : 4,
+      "type" : "ENGLISH",
+      "position" : 1
+    },
+    {
+      "token" : "分词器",
+      "start_offset" : 4,
+      "end_offset" : 7,
+      "type" : "CN_WORD",
+      "position" : 2
+    }
+  ]
+}
+```
+`ik_max_word`分词器使用：
+POST _analyze
+```json
+{
+  "analyzer": "ik_max_word",
+  "text":"这是ik分词器"
+}
+```
+返回结果：
+```json
+{
+  "tokens" : [
+    {
+      "token" : "这是",
+      "start_offset" : 0,
+      "end_offset" : 2,
+      "type" : "CN_WORD",
+      "position" : 0
+    },
+    {
+      "token" : "ik",
+      "start_offset" : 2,
+      "end_offset" : 4,
+      "type" : "ENGLISH",
+      "position" : 1
+    },
+    {
+      "token" : "分词器",
+      "start_offset" : 4,
+      "end_offset" : 7,
+      "type" : "CN_WORD",
+      "position" : 2
+    },
+    {
+      "token" : "分词",
+      "start_offset" : 4,
+      "end_offset" : 6,
+      "type" : "CN_WORD",
+      "position" : 3
+    },
+    {
+      "token" : "器",
+      "start_offset" : 6,
+      "end_offset" : 7,
+      "type" : "CN_CHAR",
+      "position" : 4
+    }
+  ]
+}
+```
+可以看到`ik_max_word`分得更细
