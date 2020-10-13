@@ -1356,4 +1356,49 @@ POST _analyze
   ]
 }
 ```
-可以看到`ik_max_word`分得更细
+可以看到`ik_max_word`分得更细。但是ik分词器对于一些新词汇会并不进行分词，只会将它们解析成一个个汉字。要对新词汇进行分词，可以引入自定义词库。
+
+#### 自定义词库
+通过修改ik分词器的配置文件IKAnalyzer.cfg.xml，可以添加自定义词库
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>IK Analyzer 扩展配置</comment>
+	<!--用户可以在这里配置自己的扩展字典 -->
+	<entry key="ext_dict"></entry>
+	 <!--用户可以在这里配置自己的扩展停止词字典-->
+	<entry key="ext_stopwords"></entry>
+	<!--用户可以在这里配置远程扩展字典 -->
+	<entry key="remote_ext_dict">http://localhost/ik.txt</entry>
+	<!--用户可以在这里配置远程扩展停止词字典-->
+	<!-- <entry key="remote_ext_stopwords">words_location</entry> -->
+</properties>
+
+```
+自定义词库可以通过nginx请求获取:
+- 下载[nginx](http://nginx.org/download/nginx-1.14.2.zip)并解压
+- 新建一个ik.txt文件放在nginx目录下的html目录下
+- 启动nginx
+- 如上修改ik分词器配置文件
+- 重启es
+在Linux下添加自定义词库方法也是一样
+### Java操作es
+Java使用[Java High Level REST Client](https://www.elastic.co/guide/en/elasticsearch/client/java-rest/7.4/java-rest-high.html)操作es。
+使用步骤：
+1. 在父工程下创建`glmall-search`项目
+2. 导入相关依赖
+```xml
+<dependency>
+    <groupId>org.elasticsearch.client</groupId>
+    <artifactId>elasticsearch-rest-high-level-client</artifactId>
+    <version>7.4.2</version>
+</dependency>
+```
+因为此项目springboot本版为2.1.8，elasticsearch默认版本为6.4.3，所以还要修改elasticsearch版本
+```xml
+<properties>
+    <java.version>1.8</java.version>
+    <elasticsearch.version>7.4.2</elasticsearch.version>
+</properties>
+```
