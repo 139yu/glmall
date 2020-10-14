@@ -1387,13 +1387,95 @@ POST _analyze
 Java使用[Java High Level REST Client](https://www.elastic.co/guide/en/elasticsearch/client/java-rest/7.4/java-rest-high.html)操作es。
 使用步骤：
 1. 在父工程下创建`glmall-search`项目
-2. 导入相关依赖
+2. 导入相关依赖，完整pom.xml文件如下：
 ```xml
-<dependency>
-    <groupId>org.elasticsearch.client</groupId>
-    <artifactId>elasticsearch-rest-high-level-client</artifactId>
-    <version>7.4.2</version>
-</dependency>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.1.8.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>com.xj.glmall</groupId>
+    <artifactId>glmall-search</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <name>glmall-search</name>
+    <description>搜索</description>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <elasticsearch.version>7.4.2</elasticsearch.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.xj.glmall</groupId>
+            <artifactId>glmall-common</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>7.4.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+        </repository>
+        <repository>
+            <id>spring-snapshots</id>
+            <name>Spring Snapshots</name>
+            <url>https://repo.spring.io/snapshot</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>spring-snapshots</id>
+            <name>Spring Snapshots</name>
+            <url>https://repo.spring.io/snapshot</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
+</project>
+
 ```
 因为此项目springboot本版为2.1.8，elasticsearch默认版本为6.4.3，所以还要修改elasticsearch版本
 ```xml
@@ -1402,3 +1484,87 @@ Java使用[Java High Level REST Client](https://www.elastic.co/guide/en/elastics
     <elasticsearch.version>7.4.2</elasticsearch.version>
 </properties>
 ```
+3. 因为引入了`glmall-common`工程，它里面有mysql相关依赖，而这里暂时不需要这些依赖，所以需要排除掉数据源相关依赖
+```java
+@EnableDiscoveryClient
+@EnableFeignClients
+@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
+public class GlmallSearchApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(GlmallSearchApplication.class, args);
+    }
+
+}
+```
+4. 依赖问题解决后，就需要配置es，新建一个`config`包，在此包下新建`GlmallElasticsearchConfig`类，具体如下：
+```java
+@Configuration
+public class GlmallElasticsearchConfig {
+
+     //通用设置项
+        public static final RequestOptions COMMON_OPTIONS;
+        static {
+            RequestOptions.Builder builder = RequestOptions.DEFAULT.toBuilder();
+            /*builder.addHeader("Authorization", "Bearer " + TOKEN);
+            builder.setHttpAsyncResponseConsumerFactory(
+                    new HttpAsyncResponseConsumerFactory
+                            .HeapBufferedResponseConsumerFactory(30 * 1024 * 1024 * 1024));*/
+            COMMON_OPTIONS = builder.build();
+        }
+    
+        /**
+         * 注入restHighLevelClient
+         * @return
+         */
+        @Bean
+        public RestHighLevelClient esRestClient(){
+            RestClientBuilder builder = null;
+            builder = RestClient.builder(
+                    new HttpHost("localhost", 9200, "http"),
+                    new HttpHost("localhost", 9201, "http")
+            );
+            RestHighLevelClient client = new RestHighLevelClient(builder);
+            return client;
+        }
+}
+```
+#### 使用`RestHighLevelClient`
+参考[官方文档](https://www.elastic.co/guide/en/elasticsearch/client/java-rest/7.4/java-rest-high-supported-apis.html)
+创建一个测试类，并注入`RestHighLevelClient`
+```java
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class GlmallSearchTest {
+
+    @Autowired
+    private RestHighLevelClient client;
+}
+```
+创建一个`User`类用于测试
+```java
+public class User {
+    private String name;
+    private Integer age;
+    private String address;
+    //getter setter方法
+}
+```
+创建索引与添加文档，其余参考[官方文档](https://www.elastic.co/guide/en/elasticsearch/client/java-rest/7.4/java-rest-high-document-index.html)
+```java
+@Test
+public void testIndex() throws IOException {
+    User user = new User();
+    user.setName("jone");
+    user.setAge(18);
+    user.setAddress("南昌");
+    //将对象转为json格式字符串
+    String jsonString = JSON.toJSONString(user);
+    IndexRequest request = new IndexRequest("user");//索引
+    request.id("2");//id
+    //这里使用同步方式发送请求，并返回结果
+    IndexResponse index = client.index(request, GlmallElasticsearchConfig.COMMON_OPTIONS);
+    System.out.println(index);
+}
+```
+
