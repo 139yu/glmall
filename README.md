@@ -1567,4 +1567,81 @@ public void testIndex() throws IOException {
     System.out.println(index);
 }
 ```
-
+#### 定义商品索引映射
+PUT product
+```json
+{
+  "mappings": {
+    "properties": {
+      "skuId":{
+        "type": "long"
+      },
+      "spuId":{
+        "type": "keyword"
+      },
+      "skuTitle":{
+        "type": "text",
+        "analyzer": "ik_smart"
+      },
+      "skuPrice":{
+        "type": "keyword"
+      },
+      "skuImg":{
+        "type": "keyword",
+        "index": false, 
+        "doc_values": false
+      },
+      "saleCount":{
+        "type": "long"
+      },
+      "hasStock":{
+        "type": "boolean"
+      },
+      "hotScore":{
+        "type": "long"
+      },
+      "brandId":{
+        "type": "long"
+      },
+      "catalogId":{
+        "type": "long"
+      },
+      "brandName":{
+        "type": "keyword",
+        "index": false,
+        "doc_values": false
+        
+      },
+      "brandImg":{
+        "type": "keyword",
+        "index": false,
+        "doc_values": false
+      },
+      "catalogName":{
+        "type": "keyword",
+        "index": false,
+        "doc_values": false
+      },
+      "attrs":{
+        "type": "nested",
+        "properties": {
+          "attrId":{
+            "type":"long"
+          },
+          "attrName":{
+            "type":"keyword",
+            "index":false,
+            "doc_values":false
+          },
+          "attrValue":{
+            
+            "type":"keyword"
+          }
+        }
+      }
+        
+    }
+  }
+}
+```
+在创建映射的过程中有一个数据类型为`nested`，若不定义为`nested`类型，在搜索数据时会出现错误的搜索结果，具体查看[官方文档](https://www.elastic.co/guide/en/elasticsearch/reference/7.5/nested.html)

@@ -80,5 +80,11 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
         this.baseMapper.setSaleCount(to.getSkuId(),to.getSaleCount());
     }
 
+    @Override
+    public List<SkuInfoEntity> getSkuInfoBySpuId(Long spuId) {
+        List<SkuInfoEntity> list = this.baseMapper.selectList(new QueryWrapper<SkuInfoEntity>().eq("spu_id", spuId));
+        return list;
+    }
+
 
 }

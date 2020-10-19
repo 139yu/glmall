@@ -3,6 +3,7 @@ package com.xj.glmall.product.service.impl;
 
 import com.xj.glmall.common.to.BoundsTo;
 import com.xj.glmall.common.to.SkuReductionTo;
+import com.xj.glmall.common.to.es.SkuEsModel;
 import com.xj.glmall.common.utils.R;
 import com.xj.glmall.product.dao.SpuInfoDescDao;
 import com.xj.glmall.product.entity.*;
@@ -47,6 +48,10 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     private SkuSaleAttrValueService skuSaleAttrValueService;
     @Autowired
     private CouponFeignService couponFeignService;
+    @Autowired
+    private BrandService brandService;
+    @Autowired
+    private CategoryService categoryService;
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<SpuInfoEntity> page = this.page(
@@ -143,6 +148,35 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         );
 
         return new PageUtils(page);
+    }
+    
+    @Override
+    public void up(Long spuId) {
+        //设置可检索属性
+        List<SkuInfoEntity> skuList = skuInfoService.getSkuInfoBySpuId(spuId);
+        skuList.stream().map(item -> {
+            SkuEsModel skuEsModel = new SkuEsModel();
+            BeanUtils.copyProperties(item,skuEsModel);
+            //skuPrice,skuImg,hasStock,hotScore,brandName,BrandImg,catalogName,attr
+            skuEsModel.setSkuPrice(item.getPrice());
+            skuEsModel.setSkuImg(item.getSkuDefaultImg());
+            //设置品牌名称
+            BrandEntity brandEntity = brandService.getById(item.getBrandId());
+            skuEsModel.setBrandName(brandEntity.getName());
+            //设置品牌图片
+            skuEsModel.setBrandImg(brandEntity.getLogo());
+            //设置分类名
+            CategoryEntity category = categoryService.getById(item.getCatalogId());
+            skuEsModel.setCatalogName(category.getName());
+
+
+            //TODO 设置是否有库存
+
+            //TODO 设置商品热度
+
+            return skuEsModel;
+        });
+        //TODO 将数据发送给es保存
     }
 
 
