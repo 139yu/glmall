@@ -4,11 +4,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.xj.glmall.member.entity.MemberReceiveAddressEntity;
 import com.xj.glmall.member.service.MemberReceiveAddressService;
@@ -18,11 +14,11 @@ import com.xj.glmall.common.utils.R;
 
 
 /**
- * 会员收货地址表
+ * 会员收货地址
  *
  * @author yu
- * @email yu
- * @date 2020-06-24 20:01:36
+ * @email ${email}
+ * @date 2020-10-21 22:14:15
  */
 @RestController
 @RequestMapping("member/memberreceiveaddress")
@@ -33,7 +29,7 @@ public class MemberReceiveAddressController {
     /**
      * 列表
      */
-    @RequestMapping("/list")
+    @GetMapping("/list")
     public R list(@RequestParam Map<String, Object> params){
         PageUtils page = memberReceiveAddressService.queryPage(params);
 
@@ -44,7 +40,7 @@ public class MemberReceiveAddressController {
     /**
      * 信息
      */
-    @RequestMapping("/info/{id}")
+    @GetMapping("/info/{id}")
     public R info(@PathVariable("id") Long id){
 		MemberReceiveAddressEntity memberReceiveAddress = memberReceiveAddressService.getById(id);
 
@@ -54,7 +50,7 @@ public class MemberReceiveAddressController {
     /**
      * 保存
      */
-    @RequestMapping("/save")
+    @PostMapping("/save")
     public R save(@RequestBody MemberReceiveAddressEntity memberReceiveAddress){
 		memberReceiveAddressService.save(memberReceiveAddress);
 
@@ -64,7 +60,7 @@ public class MemberReceiveAddressController {
     /**
      * 修改
      */
-    @RequestMapping("/update")
+    @PostMapping("/update")
     public R update(@RequestBody MemberReceiveAddressEntity memberReceiveAddress){
 		memberReceiveAddressService.updateById(memberReceiveAddress);
 
@@ -74,7 +70,7 @@ public class MemberReceiveAddressController {
     /**
      * 删除
      */
-    @RequestMapping("/delete")
+    @DeleteMapping("/delete")
     public R delete(@RequestBody Long[] ids){
 		memberReceiveAddressService.removeByIds(Arrays.asList(ids));
 

@@ -10,8 +10,8 @@ import java.util.Map;
  * 会员登录记录
  *
  * @author yu
- * @email yu
- * @date 2020-06-24 20:01:36
+ * @email ${email}
+ * @date 2020-10-21 22:14:15
  */
 public interface MemberLoginLogService extends IService<MemberLoginLogEntity> {
 

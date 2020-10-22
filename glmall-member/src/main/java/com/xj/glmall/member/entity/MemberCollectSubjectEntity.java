@@ -8,15 +8,15 @@ import java.util.Date;
 import lombok.Data;
 
 /**
- * 成长值变化历史记录
+ * 会员收藏的专题活动
  * 
  * @author yu
  * @email ${email}
  * @date 2020-10-21 22:14:15
  */
 @Data
-@TableName("ums_growth_change_history")
-public class GrowthChangeHistoryEntity implements Serializable {
+@TableName("ums_member_collect_subject")
+public class MemberCollectSubjectEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -25,24 +25,20 @@ public class GrowthChangeHistoryEntity implements Serializable {
 	@TableId
 	private Long id;
 	/**
-	 * member_id
+	 * subject_id
 	 */
-	private Long memberId;
+	private Long subjectId;
 	/**
-	 * create_time
+	 * subject_name
 	 */
-	private Date createTime;
+	private String subjectName;
 	/**
-	 * 改变的值（正负计数）
+	 * subject_img
 	 */
-	private Integer changeCount;
+	private String subjectImg;
 	/**
-	 * 备注
+	 * 活动url
 	 */
-	private String note;
-	/**
-	 * 积分来源[0-购物，1-管理员修改]
-	 */
-	private Integer sourceType;
+	private String subjectUrll;
 
 }

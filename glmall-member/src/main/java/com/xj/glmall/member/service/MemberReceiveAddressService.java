@@ -7,11 +7,11 @@ import com.xj.glmall.member.entity.MemberReceiveAddressEntity;
 import java.util.Map;
 
 /**
- * 会员收货地址表
+ * 会员收货地址
  *
  * @author yu
- * @email yu
- * @date 2020-06-24 20:01:36
+ * @email ${email}
+ * @date 2020-10-21 22:14:15
  */
 public interface MemberReceiveAddressService extends IService<MemberReceiveAddressEntity> {
 

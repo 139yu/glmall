@@ -8,10 +8,8 @@
         <result property="id" column="id"/>
         <result property="memberId" column="member_id"/>
         <result property="createTime" column="create_time"/>
-        <result property="changeType" column="change_type"/>
         <result property="changeCount" column="change_count"/>
-        <result property="operateMan" column="operate_man"/>
-        <result property="operateNote" column="operate_note"/>
+        <result property="note" column="note"/>
         <result property="sourceType" column="source_type"/>
     </resultMap>
 

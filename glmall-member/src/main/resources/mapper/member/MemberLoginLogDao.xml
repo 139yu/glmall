@@ -11,7 +11,6 @@
         <result property="ip" column="ip"/>
         <result property="city" column="city"/>
         <result property="loginType" column="login_type"/>
-        <result property="province" column="province"/>
     </resultMap>
 
 

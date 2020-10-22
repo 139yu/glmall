@@ -6,32 +6,32 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.xj.glmall.member.entity.MemberEntity;
-import com.xj.glmall.member.service.MemberService;
+import com.xj.glmall.member.entity.MemberCollectSpuEntity;
+import com.xj.glmall.member.service.MemberCollectSpuService;
 import com.xj.glmall.common.utils.PageUtils;
 import com.xj.glmall.common.utils.R;
 
 
 
 /**
- * 会员
+ * 会员收藏的商品
  *
  * @author yu
  * @email ${email}
  * @date 2020-10-21 22:14:15
  */
 @RestController
-@RequestMapping("member/member")
-public class MemberController {
+@RequestMapping("member/membercollectspu")
+public class MemberCollectSpuController {
     @Autowired
-    private MemberService memberService;
+    private MemberCollectSpuService memberCollectSpuService;
 
     /**
      * 列表
      */
     @GetMapping("/list")
     public R list(@RequestParam Map<String, Object> params){
-        PageUtils page = memberService.queryPage(params);
+        PageUtils page = memberCollectSpuService.queryPage(params);
 
         return R.ok().put("page", page);
     }
@@ -42,17 +42,17 @@ public class MemberController {
      */
     @GetMapping("/info/{id}")
     public R info(@PathVariable("id") Long id){
-		MemberEntity member = memberService.getById(id);
+		MemberCollectSpuEntity memberCollectSpu = memberCollectSpuService.getById(id);
 
-        return R.ok().put("member", member);
+        return R.ok().put("memberCollectSpu", memberCollectSpu);
     }
 
     /**
      * 保存
      */
     @PostMapping("/save")
-    public R save(@RequestBody MemberEntity member){
-		memberService.save(member);
+    public R save(@RequestBody MemberCollectSpuEntity memberCollectSpu){
+		memberCollectSpuService.save(memberCollectSpu);
 
         return R.ok();
     }
@@ -61,8 +61,8 @@ public class MemberController {
      * 修改
      */
     @PostMapping("/update")
-    public R update(@RequestBody MemberEntity member){
-		memberService.updateById(member);
+    public R update(@RequestBody MemberCollectSpuEntity memberCollectSpu){
+		memberCollectSpuService.updateById(memberCollectSpu);
 
         return R.ok();
     }
@@ -72,7 +72,7 @@ public class MemberController {
      */
     @DeleteMapping("/delete")
     public R delete(@RequestBody Long[] ids){
-		memberService.removeByIds(Arrays.asList(ids));
+		memberCollectSpuService.removeByIds(Arrays.asList(ids));
 
         return R.ok();
     }

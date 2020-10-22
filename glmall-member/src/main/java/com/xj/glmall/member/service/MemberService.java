@@ -7,11 +7,11 @@ import com.xj.glmall.member.entity.MemberEntity;
 import java.util.Map;
 
 /**
- * 会员表
+ * 会员
  *
  * @author yu
- * @email yu
- * @date 2020-06-24 20:01:37
+ * @email ${email}
+ * @date 2020-10-21 22:14:15
  */
 public interface MemberService extends IService<MemberEntity> {
 

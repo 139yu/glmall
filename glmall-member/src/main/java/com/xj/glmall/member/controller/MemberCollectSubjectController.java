@@ -6,32 +6,32 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.xj.glmall.member.entity.MemberEntity;
-import com.xj.glmall.member.service.MemberService;
+import com.xj.glmall.member.entity.MemberCollectSubjectEntity;
+import com.xj.glmall.member.service.MemberCollectSubjectService;
 import com.xj.glmall.common.utils.PageUtils;
 import com.xj.glmall.common.utils.R;
 
 
 
 /**
- * 会员
+ * 会员收藏的专题活动
  *
  * @author yu
  * @email ${email}
  * @date 2020-10-21 22:14:15
  */
 @RestController
-@RequestMapping("member/member")
-public class MemberController {
+@RequestMapping("member/membercollectsubject")
+public class MemberCollectSubjectController {
     @Autowired
-    private MemberService memberService;
+    private MemberCollectSubjectService memberCollectSubjectService;
 
     /**
      * 列表
      */
     @GetMapping("/list")
     public R list(@RequestParam Map<String, Object> params){
-        PageUtils page = memberService.queryPage(params);
+        PageUtils page = memberCollectSubjectService.queryPage(params);
 
         return R.ok().put("page", page);
     }
@@ -42,17 +42,17 @@ public class MemberController {
      */
     @GetMapping("/info/{id}")
     public R info(@PathVariable("id") Long id){
-		MemberEntity member = memberService.getById(id);
+		MemberCollectSubjectEntity memberCollectSubject = memberCollectSubjectService.getById(id);
 
-        return R.ok().put("member", member);
+        return R.ok().put("memberCollectSubject", memberCollectSubject);
     }
 
     /**
      * 保存
      */
     @PostMapping("/save")
-    public R save(@RequestBody MemberEntity member){
-		memberService.save(member);
+    public R save(@RequestBody MemberCollectSubjectEntity memberCollectSubject){
+		memberCollectSubjectService.save(memberCollectSubject);
 
         return R.ok();
     }
@@ -61,8 +61,8 @@ public class MemberController {
      * 修改
      */
     @PostMapping("/update")
-    public R update(@RequestBody MemberEntity member){
-		memberService.updateById(member);
+    public R update(@RequestBody MemberCollectSubjectEntity memberCollectSubject){
+		memberCollectSubjectService.updateById(memberCollectSubject);
 
         return R.ok();
     }
@@ -72,7 +72,7 @@ public class MemberController {
      */
     @DeleteMapping("/delete")
     public R delete(@RequestBody Long[] ids){
-		memberService.removeByIds(Arrays.asList(ids));
+		memberCollectSubjectService.removeByIds(Arrays.asList(ids));
 
         return R.ok();
     }

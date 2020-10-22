@@ -9,11 +9,11 @@ import java.util.Date;
 import lombok.Data;
 
 /**
- * 会员等级表
+ * 会员等级
  * 
  * @author yu
- * @email yu
- * @date 2020-06-24 20:01:37
+ * @email ${email}
+ * @date 2020-10-21 22:14:15
  */
 @Data
 @TableName("ums_member_level")
@@ -21,20 +21,20 @@ public class MemberLevelEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * 
+	 * id
 	 */
 	@TableId
 	private Long id;
 	/**
-	 * 
+	 * 等级名称
 	 */
 	private String name;
 	/**
-	 * 
+	 * 等级需要的成长值
 	 */
 	private Integer growthPoint;
 	/**
-	 * 是否为默认等级：0->不是；1->是
+	 * 是否为默认等级[0->不是；1->是]
 	 */
 	private Integer defaultStatus;
 	/**
@@ -50,18 +50,6 @@ public class MemberLevelEntity implements Serializable {
 	 */
 	private Integer priviledgeFreeFreight;
 	/**
-	 * 是否有签到特权
-	 */
-	private Integer priviledgeSignIn;
-	/**
-	 * 是否有评论获奖励特权
-	 */
-	private Integer priviledgeComment;
-	/**
-	 * 是否有专享活动特权
-	 */
-	private Integer priviledgePromotion;
-	/**
 	 * 是否有会员价格特权
 	 */
 	private Integer priviledgeMemberPrice;
@@ -70,7 +58,7 @@ public class MemberLevelEntity implements Serializable {
 	 */
 	private Integer priviledgeBirthday;
 	/**
-	 * 
+	 * 备注
 	 */
 	private String note;
 

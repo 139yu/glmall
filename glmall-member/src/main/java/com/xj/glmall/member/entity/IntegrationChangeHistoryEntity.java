@@ -8,11 +8,11 @@ import java.util.Date;
 import lombok.Data;
 
 /**
- * 积分变化历史记录表
+ * 积分变化历史记录
  * 
  * @author yu
- * @email yu
- * @date 2020-06-24 20:01:37
+ * @email ${email}
+ * @date 2020-10-21 22:14:15
  */
 @Data
 @TableName("ums_integration_change_history")
@@ -20,37 +20,29 @@ public class IntegrationChangeHistoryEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * 
+	 * id
 	 */
 	@TableId
 	private Long id;
 	/**
-	 * 
+	 * member_id
 	 */
 	private Long memberId;
 	/**
-	 * 
+	 * create_time
 	 */
 	private Date createTime;
 	/**
-	 * 改变类型：0->增加；1->减少
-	 */
-	private Integer changeType;
-	/**
-	 * 积分改变数量
+	 * 变化的值
 	 */
 	private Integer changeCount;
 	/**
-	 * 操作人员
+	 * 备注
 	 */
-	private String operateMan;
+	private String note;
 	/**
-	 * 操作备注
+	 * 来源[0->购物；1->管理员修改;2->活动]
 	 */
-	private String operateNote;
-	/**
-	 * 积分来源：0->购物；1->管理员修改
-	 */
-	private Integer sourceType;
+	private Integer sourceTyoe;
 
 }

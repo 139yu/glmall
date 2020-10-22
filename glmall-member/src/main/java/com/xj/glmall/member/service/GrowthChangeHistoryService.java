@@ -7,11 +7,11 @@ import com.xj.glmall.member.entity.GrowthChangeHistoryEntity;
 import java.util.Map;
 
 /**
- * 成长值变化历史记录表
+ * 成长值变化历史记录
  *
  * @author yu
- * @email yu
- * @date 2020-06-24 20:01:37
+ * @email ${email}
+ * @date 2020-10-21 22:14:15
  */
 public interface GrowthChangeHistoryService extends IService<GrowthChangeHistoryEntity> {
 

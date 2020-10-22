@@ -8,13 +8,14 @@
         <result property="id" column="id"/>
         <result property="memberId" column="member_id"/>
         <result property="name" column="name"/>
-        <result property="phoneNumber" column="phone_number"/>
-        <result property="defaultStatus" column="default_status"/>
+        <result property="phone" column="phone"/>
         <result property="postCode" column="post_code"/>
         <result property="province" column="province"/>
         <result property="city" column="city"/>
         <result property="region" column="region"/>
         <result property="detailAddress" column="detail_address"/>
+        <result property="areacode" column="areacode"/>
+        <result property="defaultStatus" column="default_status"/>
     </resultMap>
 
 

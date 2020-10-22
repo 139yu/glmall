@@ -12,9 +12,6 @@
         <result property="freeFreightPoint" column="free_freight_point"/>
         <result property="commentGrowthPoint" column="comment_growth_point"/>
         <result property="priviledgeFreeFreight" column="priviledge_free_freight"/>
-        <result property="priviledgeSignIn" column="priviledge_sign_in"/>
-        <result property="priviledgeComment" column="priviledge_comment"/>
-        <result property="priviledgePromotion" column="priviledge_promotion"/>
         <result property="priviledgeMemberPrice" column="priviledge_member_price"/>
         <result property="priviledgeBirthday" column="priviledge_birthday"/>
         <result property="note" column="note"/>

@@ -8,11 +8,11 @@ import java.util.Date;
 import lombok.Data;
 
 /**
- * 会员表
+ * 会员
  * 
  * @author yu
- * @email yu
- * @date 2020-06-24 20:01:37
+ * @email ${email}
+ * @date 2020-10-21 22:14:15
  */
 @Data
 @TableName("ums_member")
@@ -20,14 +20,14 @@ public class MemberEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * 
+	 * id
 	 */
 	@TableId
 	private Long id;
 	/**
-	 * 
+	 * 会员等级id
 	 */
-	private Long memberLevelId;
+	private Long levelId;
 	/**
 	 * 用户名
 	 */
@@ -43,29 +43,25 @@ public class MemberEntity implements Serializable {
 	/**
 	 * 手机号码
 	 */
-	private String phone;
+	private String mobile;
 	/**
-	 * 帐号启用状态:0->禁用；1->启用
+	 * 邮箱
 	 */
-	private Integer status;
-	/**
-	 * 注册时间
-	 */
-	private Date createTime;
+	private String email;
 	/**
 	 * 头像
 	 */
-	private String icon;
+	private String header;
 	/**
-	 * 性别：0->未知；1->男；2->女
+	 * 性别
 	 */
 	private Integer gender;
 	/**
 	 * 生日
 	 */
-	private Date birthday;
+	private Date birth;
 	/**
-	 * 所做城市
+	 * 所在城市
 	 */
 	private String city;
 	/**
@@ -75,7 +71,7 @@ public class MemberEntity implements Serializable {
 	/**
 	 * 个性签名
 	 */
-	private String personalizedSignature;
+	private String sign;
 	/**
 	 * 用户来源
 	 */
@@ -89,12 +85,12 @@ public class MemberEntity implements Serializable {
 	 */
 	private Integer growth;
 	/**
-	 * 剩余抽奖次数
+	 * 启用状态
 	 */
-	private Integer luckeyCount;
+	private Integer status;
 	/**
-	 * 历史积分数量
+	 * 注册时间
 	 */
-	private Integer historyIntegration;
+	private Date createTime;
 
 }

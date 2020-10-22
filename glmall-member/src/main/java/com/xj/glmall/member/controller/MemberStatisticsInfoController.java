@@ -4,11 +4,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.xj.glmall.member.entity.MemberStatisticsInfoEntity;
 import com.xj.glmall.member.service.MemberStatisticsInfoService;
@@ -21,8 +17,8 @@ import com.xj.glmall.common.utils.R;
  * 会员统计信息
  *
  * @author yu
- * @email yu
- * @date 2020-06-24 20:01:36
+ * @email ${email}
+ * @date 2020-10-21 22:14:15
  */
 @RestController
 @RequestMapping("member/memberstatisticsinfo")
@@ -33,7 +29,7 @@ public class MemberStatisticsInfoController {
     /**
      * 列表
      */
-    @RequestMapping("/list")
+    @GetMapping("/list")
     public R list(@RequestParam Map<String, Object> params){
         PageUtils page = memberStatisticsInfoService.queryPage(params);
 
@@ -44,7 +40,7 @@ public class MemberStatisticsInfoController {
     /**
      * 信息
      */
-    @RequestMapping("/info/{id}")
+    @GetMapping("/info/{id}")
     public R info(@PathVariable("id") Long id){
 		MemberStatisticsInfoEntity memberStatisticsInfo = memberStatisticsInfoService.getById(id);
 
@@ -54,7 +50,7 @@ public class MemberStatisticsInfoController {
     /**
      * 保存
      */
-    @RequestMapping("/save")
+    @PostMapping("/save")
     public R save(@RequestBody MemberStatisticsInfoEntity memberStatisticsInfo){
 		memberStatisticsInfoService.save(memberStatisticsInfo);
 
@@ -64,7 +60,7 @@ public class MemberStatisticsInfoController {
     /**
      * 修改
      */
-    @RequestMapping("/update")
+    @PostMapping("/update")
     public R update(@RequestBody MemberStatisticsInfoEntity memberStatisticsInfo){
 		memberStatisticsInfoService.updateById(memberStatisticsInfo);
 
@@ -74,7 +70,7 @@ public class MemberStatisticsInfoController {
     /**
      * 删除
      */
-    @RequestMapping("/delete")
+    @DeleteMapping("/delete")
     public R delete(@RequestBody Long[] ids){
 		memberStatisticsInfoService.removeByIds(Arrays.asList(ids));
 
