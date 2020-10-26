@@ -5,6 +5,8 @@ import com.xj.glmall.common.utils.R;
 import com.xj.glmall.ware.feign.ProductServiceFeign;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Map;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -33,7 +35,7 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
         if (!StringUtils.isEmpty(skuId)) {
             wrapper.eq("sku_id",skuId);
         }
-        if (!StringUtils.isEmpty("wareId")) {
+        if (!StringUtils.isEmpty(wareId)) {
             wrapper.eq("ware_id",wareId);
         }
         IPage<WareSkuEntity> page = this.page(
@@ -53,7 +55,6 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             WareSkuEntity wareSkuEntity = new WareSkuEntity();
             try{
                 R r = productServiceFeign.getSkuInfo(skuId);
-                System.out.println();
                 Map<String,Object> data = (Map<String, Object>) r.get("skuInfo");
                 if (r.getCode() == 0) {
                     wareSkuEntity.setSkuName((String) data.get("skuName"));
@@ -69,6 +70,39 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
         }else {
             wareSkuDao.addStock(skuId, Math.toIntExact(skuNum),wareId);
         }
+    }
+
+    @Override
+    public void saveWareSku(WareSkuEntity wareSku) {
+        QueryWrapper<WareSkuEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq("sku_id",wareSku.getSkuId());
+        wrapper.eq("ware_id",wareSku.getWareId());
+        WareSkuEntity entity = this.baseMapper.selectOne(wrapper);
+        if (entity == null) {
+            this.baseMapper.insert(wareSku);
+        }else {
+            wareSku.setStock(wareSku.getStock() + entity.getStock());
+            wareSku.setStockLocked(wareSku.getStockLocked() + entity.getStockLocked());
+            wareSku.setId(entity.getId());
+            this.baseMapper.updateById(wareSku);
+        }
+     }
+
+    @Override
+    public Integer getSkuStock(Long skuId) {
+        QueryWrapper<WareSkuEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq("sku_id",skuId);
+        List<WareSkuEntity> skuEntities = this.baseMapper.selectList(wrapper);
+        int stock = 0;
+        if (skuEntities == null || skuEntities.size() <= 0) {
+            return 0;
+        }else {
+            for (WareSkuEntity skuEntity : skuEntities) {
+                stock += skuEntity.getStock();
+            }
+            return stock;
+        }
+
     }
 
 }

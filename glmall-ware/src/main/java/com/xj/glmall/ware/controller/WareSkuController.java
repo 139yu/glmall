@@ -36,6 +36,11 @@ public class WareSkuController {
         return R.ok().put("page", page);
     }
 
+    @GetMapping("/getSkuStock/{skuId}")
+    public R getSkuStock(@PathVariable Long skuId){
+        Integer stock = wareSkuService.getSkuStock(skuId);
+        return R.ok().put("stock",stock);
+    }
 
     /**
      * 信息
@@ -52,7 +57,7 @@ public class WareSkuController {
      */
     @PostMapping("/save")
     public R save(@RequestBody WareSkuEntity wareSku){
-		wareSkuService.save(wareSku);
+		wareSkuService.saveWareSku(wareSku);
 
         return R.ok();
     }

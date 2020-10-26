@@ -8,6 +8,7 @@ import com.xj.glmall.common.utils.R;
 import com.xj.glmall.product.dao.SpuInfoDescDao;
 import com.xj.glmall.product.entity.*;
 import com.xj.glmall.product.feign.CouponFeignService;
+import com.xj.glmall.product.feign.WareFeignService;
 import com.xj.glmall.product.service.*;
 import com.xj.glmall.product.vo.*;
 import org.springframework.beans.BeanUtils;
@@ -52,6 +53,8 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     private BrandService brandService;
     @Autowired
     private CategoryService categoryService;
+    @Autowired
+    private WareFeignService wareFeignService;
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<SpuInfoEntity> page = this.page(
@@ -169,13 +172,18 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             CategoryEntity category = categoryService.getById(item.getCatalogId());
             skuEsModel.setCatalogName(category.getName());
 
-
             //TODO 设置是否有库存
-
+            R skuStock = wareFeignService.getSkuStock(item.getSkuId());
+            Integer stock = (Integer) skuStock.get("stock");
+            if (stock > 0) {
+                skuEsModel.setHasStock(true);
+            }else {
+                skuEsModel.setHasStock(false);
+            }
             //TODO 设置商品热度
 
             return skuEsModel;
-        });
+        }).collect(Collectors.toList());
         //TODO 将数据发送给es保存
     }
 
