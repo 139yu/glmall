@@ -1,8 +1,10 @@
 package com.xj.glmall.ware.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
+import com.xj.glmall.ware.vo.SkuHasStockVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,7 +43,13 @@ public class WareSkuController {
         Integer stock = wareSkuService.getSkuStock(skuId);
         return R.ok().put("stock",stock);
     }
-
+    @PostMapping("/getSkuHasStock")
+    public R<List<SkuHasStockVo>> getSkuHasStock(@RequestBody List<Long> skuIds){
+        List<SkuHasStockVo> list = wareSkuService.getSkuHasStock(skuIds);
+        R<List<SkuHasStockVo>> ok = R.ok();
+        ok.setData(list);
+        return ok;
+    }
     /**
      * 信息
      */

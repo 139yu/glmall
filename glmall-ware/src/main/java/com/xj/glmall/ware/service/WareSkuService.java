@@ -3,7 +3,9 @@ package com.xj.glmall.ware.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xj.glmall.common.utils.PageUtils;
 import com.xj.glmall.ware.entity.WareSkuEntity;
+import com.xj.glmall.ware.vo.SkuHasStockVo;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,5 +24,7 @@ public interface WareSkuService extends IService<WareSkuEntity> {
     void saveWareSku(WareSkuEntity wareSku);
 
     Integer getSkuStock(Long skuId);
+
+    List<SkuHasStockVo> getSkuHasStock(List<Long> skuIds);
 }
 

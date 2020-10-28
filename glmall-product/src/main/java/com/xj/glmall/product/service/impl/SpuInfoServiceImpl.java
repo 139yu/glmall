@@ -1,6 +1,8 @@
 package com.xj.glmall.product.service.impl;
 
 
+import com.alibaba.fastjson.TypeReference;
+import com.xj.glmall.common.constant.ProductConstant;
 import com.xj.glmall.common.to.BoundsTo;
 import com.xj.glmall.common.to.SkuReductionTo;
 import com.xj.glmall.common.to.es.SkuEsModel;
@@ -8,6 +10,7 @@ import com.xj.glmall.common.utils.R;
 import com.xj.glmall.product.dao.SpuInfoDescDao;
 import com.xj.glmall.product.entity.*;
 import com.xj.glmall.product.feign.CouponFeignService;
+import com.xj.glmall.product.feign.SearchFeignService;
 import com.xj.glmall.product.feign.WareFeignService;
 import com.xj.glmall.product.service.*;
 import com.xj.glmall.product.vo.*;
@@ -16,9 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -55,6 +56,11 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     private CategoryService categoryService;
     @Autowired
     private WareFeignService wareFeignService;
+    @Autowired
+    private AttrService attrService;
+    @Autowired
+    private SearchFeignService searchFeignService;
+
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<SpuInfoEntity> page = this.page(
@@ -64,7 +70,6 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
         return new PageUtils(page);
     }
-
     @Override
     @Transactional
     public void saveSpuInfo(SpuSaveVo saveVo) {
@@ -156,10 +161,40 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     @Override
     public void up(Long spuId) {
         //设置可检索属性
+        List<ProductAttrValueEntity> productAttrValueEntities = productAttrValueService.baseAttrListForSpuId(spuId);
+        List<Long> attrIds = productAttrValueEntities.stream().map(item -> {
+            return item.getAttrId();
+        }).collect(Collectors.toList());
+        List<Long> searchAttrIds = attrService.selectSearchAttrIds(attrIds);
+        System.out.println(searchAttrIds);
+        Set<Long> idSet = new HashSet<>(searchAttrIds);
+        List<SkuEsModel.Attr> collect = productAttrValueEntities.stream().filter(item -> {
+            return idSet.contains(item.getAttrId());
+        }).map(obj -> {
+            SkuEsModel.Attr attr = new SkuEsModel.Attr();
+            attr.setAttrId(obj.getAttrId());
+            attr.setAttrName(obj.getAttrName());
+            attr.setAttrValue(obj.getAttrValue());
+            return attr;
+        }).collect(Collectors.toList());
+
         List<SkuInfoEntity> skuList = skuInfoService.getSkuInfoBySpuId(spuId);
-        skuList.stream().map(item -> {
+        List<Long> skuIds = skuList.stream().map(SkuInfoEntity::getSkuId).collect(Collectors.toList());
+        Map<Long, Boolean> hasStockMap = null;
+        try {
+            R<List<SkuHasStockVo>> skuHasStock = wareFeignService.getSkuHasStock(skuIds);
+            TypeReference<List<SkuHasStockVo>> typeReference = new TypeReference<List<SkuHasStockVo>>() {
+            };
+            hasStockMap = skuHasStock.getData(typeReference).stream().collect(Collectors.toMap(SkuHasStockVo::getSkuId, SkuHasStockVo::getHasStack));
+        }catch (Exception e) {
+            log.error("库存服务查询异常：原因{}",e);
+        }
+
+
+        Map<Long, Boolean> finalHasStockMap = hasStockMap;
+        List<SkuEsModel> skuEsModelList = skuList.stream().map(item -> {
             SkuEsModel skuEsModel = new SkuEsModel();
-            BeanUtils.copyProperties(item,skuEsModel);
+            BeanUtils.copyProperties(item, skuEsModel);
             //skuPrice,skuImg,hasStock,hotScore,brandName,BrandImg,catalogName,attr
             skuEsModel.setSkuPrice(item.getPrice());
             skuEsModel.setSkuImg(item.getSkuDefaultImg());
@@ -171,20 +206,26 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             //设置分类名
             CategoryEntity category = categoryService.getById(item.getCatalogId());
             skuEsModel.setCatalogName(category.getName());
-
+            //设置attrs
+            skuEsModel.setAttrs(collect);
             //TODO 设置是否有库存
-            R skuStock = wareFeignService.getSkuStock(item.getSkuId());
-            Integer stock = (Integer) skuStock.get("stock");
-            if (stock > 0) {
+            if (finalHasStockMap == null) {
                 skuEsModel.setHasStock(true);
-            }else {
-                skuEsModel.setHasStock(false);
+            } else {
+                skuEsModel.setHasStock(finalHasStockMap.get(item.getSkuId()));
             }
-            //TODO 设置商品热度
 
+            //TODO 设置商品热度
+            skuEsModel.setHotScore(0L);
             return skuEsModel;
         }).collect(Collectors.toList());
         //TODO 将数据发送给es保存
+        R r = searchFeignService.productSave(skuEsModelList);
+        if (r.getCode() == 0) {
+            baseMapper.updateSataus(spuId, ProductConstant.StatusEnum.SPU_UP.getCode());
+        }else {
+            //TODO 上架失败继续重复调用
+        }
     }
 
 

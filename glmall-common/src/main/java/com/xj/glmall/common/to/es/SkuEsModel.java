@@ -20,7 +20,7 @@ public class SkuEsModel {
     private Long catalogId;
     private String brandName;
     private String catalogName;
-
+    public List<Attr> attrs;
     @Data
     public static class Attr{
         private Long attrId;
