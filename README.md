@@ -1645,3 +1645,34 @@ PUT product
 }
 ```
 在创建映射的过程中有一个数据类型为`nested`，若不定义为`nested`类型，在搜索数据时会出现错误的搜索结果，具体查看[官方文档](https://www.elastic.co/guide/en/elasticsearch/reference/7.5/nested.html)
+### thymeleaf使用
+1.引入依赖
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-thymeleaf</artifactId>
+</dependency>
+```
+2.关闭thymeleaf缓存
+```yaml
+spring:
+  thymeleaf:
+    cache: false
+```
+3.将页面放在`/resource/template`目录下，静态资源放在`/resource/static`目录下，thymeleaf为我们添加了一些默认配置:
+```java
+public static final String DEFAULT_PREFIX = "classpath:/templates/";
+public static final String DEFAULT_SUFFIX = ".html";
+private boolean checkTemplate = true;
+private boolean checkTemplateLocation = true;
+private String prefix = "classpath:/templates/";
+private String suffix = ".html";
+private String mode = "HTML";
+```
+4.引入spring boot的`dev-tools`依赖，使用build下面的功能可以重新编译整个项目或者当前页面
+```java
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-devtools</artifactId>
+</dependency>
+```
