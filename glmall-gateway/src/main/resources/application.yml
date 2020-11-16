@@ -54,3 +54,8 @@ spring:
             - Path=/api/**
           filters:
             - RewritePath=/api(?<segment>/?.*),/renren-fast/$\{segment}
+
+        - id: glmall_host
+          uri: lb://glmall-product
+          predicates:
+            - Host=**.glmall.com,glmall.com

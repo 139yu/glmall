@@ -1676,3 +1676,47 @@ private String mode = "HTML";
     <artifactId>spring-boot-devtools</artifactId>
 </dependency>
 ```
+## 整合redis
+1.引入依赖
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+```
+2.配置redis的host信息
+```yaml
+spring:
+  redis:
+    host: localhost 
+```
+3.使用springboot自动配置好的StringRedisTemplate来操作redis
+### 整合了`redis`进行压力测试出现的异常
+- 对外内存溢出：OutOfDirectMemoryError
+原因：spring boot2.0以后默认使用Lettuce操作redis的客户端，它使用netty进行网络通信。Lettuce的bug导致netty堆外内存溢出，如果指定Java堆的内存：Xmx300m，则netty的堆外内存也使用这个大小。
+虽然可以通过-Dio.netty.max.DirectMemory进行netty堆外内存的设置，但是这只是延缓出现这个异常，在长久运行累积后还是会出现。
+解决方案：1.升级Lettuce客户端（目前还未解决此bug）。2.切换使用jedis（许久未更新）
+切换jedis操作redis客户端：修改pom文件，排除Lettuce依赖，引入
+### 缓存穿透、击穿、雪崩
+- 缓存穿透
+指查询一个永远不存在的数据，由于缓存是不命中的，将去查询数据库，但是数据库也无此纪录，这将导致这个不存在的数据每次请求都要到存储层去查询。
+风险：利用不存在的数据进行攻击，数据库压力瞬时增大，最终导致崩溃
+解决：null结果缓存，并加入短暂过期
+- 缓存雪崩
+设置缓存时key采用了相同的过期时间，导致缓存在某一时刻同时失效，请求全部转发到数据库，数据库瞬时压力过重导致雪崩
+解决：原有的失效时间基础上增加一个随机值，比如1~5分钟随机，这样每一个缓存的过期时间重复率就低，很难引发集体失效事件
+- 缓存击穿
+对于一些设置了过期时间的key，如果这些key可能会在某些时间点被超高并发的访问，是一种非常“热点”的数据。如果这个key在大量请求同时进来时失效，那么所有的请求对这个key的查询都会落在数据库。
+解决：加锁，大并发只让一个去查，其他人先等待，查到以后就释放锁，其他人获取到锁，先查缓存，就会有数据，不用去数据库
+#### 加锁解决缓存击穿问题
+以商品服务的查询三级分类为例。在查询数据库之前先判断在redis缓存中是否有数据，若没有数据就查询数据库，并把查询到的数据存放在redis中，有数据就直接返回。
+出现问题：
+- 第一个请求查询完数据库释放锁后向redis中保存数据，因为这个操作需要向redis发送请求，也需要花费时间，所有有可能数据还未保存完，其他请求有进来向redis中查询数据，发现没有数据，又向数据库中查询。
+
+解决方式：在未释放锁时就把查询到的数据保存在redis中
+#### 分布式锁的实现
+分布式锁是让多个进程获取同一个锁，所以锁可以放在多个进程都能访问到的地方，如数据库、redis等。因为访问redis的速度比访问MySQL速度快，所以这里的锁放在redis中。
+商品服务的查询三级分类分布式锁实现方式：把要存在redis中的锁的key命名为lock，每次请求过来，先判断redis中是否存在lock，不存在就保存lock，值可以使用UUID获取，保证每个线程设置的lock的值都不一样，
+并且要保证每次只有一个线程能设置lock的值，而redis的`set key value NX`可以保证每次只有一个请求能设置，并且只有键key不存在的时候才会设置key的值。而设置了key，就要删除key
+注意事项：
+- 保证保存key与设置过期时间是原子操作。

@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 public class Catalog2Vo {
-    private String calalog1Id;
+    private String catalog1Id;
     private String id;
     private String name;
     private List<Catalog3Vo> catalog3List;

@@ -10,7 +10,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @MapperScan("com.xj.glmall.product.dao")
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = "com.xj.glmall.product.feign")
-public class GlmallProductApplication {
+public class    GlmallProductApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(GlmallProductApplication.class, args);
