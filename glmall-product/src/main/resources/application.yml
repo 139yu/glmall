@@ -10,6 +10,7 @@ spring:
     cache: true
   redis:
     host: localhost
+    password:
 mybatis-plus:
   mapper-locations: classpath:/mapper/**/*.xml
   global-config:
@@ -21,4 +22,4 @@ server:
   port: 10012
 logging:
   level:
-    com.xj.glmall.product: debug
+    com.xj.glmall.product: error

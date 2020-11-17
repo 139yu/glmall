@@ -1717,6 +1717,45 @@ spring:
 #### 分布式锁的实现
 分布式锁是让多个进程获取同一个锁，所以锁可以放在多个进程都能访问到的地方，如数据库、redis等。因为访问redis的速度比访问MySQL速度快，所以这里的锁放在redis中。
 商品服务的查询三级分类分布式锁实现方式：把要存在redis中的锁的key命名为lock，每次请求过来，先判断redis中是否存在lock，不存在就保存lock，值可以使用UUID获取，保证每个线程设置的lock的值都不一样，
-并且要保证每次只有一个线程能设置lock的值，而redis的`set key value NX`可以保证每次只有一个请求能设置，并且只有键key不存在的时候才会设置key的值。而设置了key，就要删除key
+并且要保证每次只有一个线程能设置lock的值。redis的`set key value NX`只有键key不存在的时候才会设置key的值，并且可以保证每次只有一个请求能设置。获取锁之后就要释放锁，对应的操作就是删除key，在多线程情况下，要保证
+每次删除的key都是当前线程的key，所以要先判断当前线程设置的key的值是否与redis中key'的值相等，这两个操作也要保证是原子操作。伪代码如下
+```java
+public class CategoryServiceImpl extends CategoryService {
+    
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    public Map<String, List<Catalog2Vo>> getCatalogMapRedisLock(){
+        //为保证每个锁的值都不一样，使用uuid
+        String uuid = UUID.randomUUID().toString();
+        //将锁保存在redis中，并设置过期时间
+        Boolean isLock = redisTemplate.opsForValue().setIfAbsent("lock",uuid,30,TimeUnie.SECONDS);
+        //如果获取到了锁
+        if(isLock) {
+            Map<String, List<Catalog2Vo>> catalogJsonFromDB = null;
+            //获取到了锁就去redis中查看是否又数据，没有就从数据库中获取
+           try {
+               //获取数据
+               catalogJsonFromDB = getData();
+           }finally {
+               //无聊获取数据是否成功，都要释放锁，防止出现死锁
+               //判断锁是否是当前线程的锁与删除锁操作保证原子操作
+               String script = "if redis.call(\"get\",KEYS[1]) == ARGV[1] then return redis.call(\"del\",KEYS[1]) else return 0 end";
+               Long execute = redisTemplate.execute(new DefaultRedisScript<>(script, Long.class), Arrays.asList("productLock"), productLock);
+               return catalogJsonFromDB;
+           }
+        }else {
+            try{
+                Thread.sleep(100);
+            }catch(Exception e) {
+                
+            }
+            //获取锁失败就尝试再次获取
+            return getCatalogMapRedisLock();
+        }
+    }
+}
+
+```
 注意事项：
 - 保证保存key与设置过期时间是原子操作。
