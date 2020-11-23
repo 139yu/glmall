@@ -1758,4 +1758,73 @@ public class CategoryServiceImpl extends CategoryService {
 
 ```
 注意事项：
-- 保证保存key与设置过期时间是原子操作。
+- 如果在执行业务逻辑时，出现异常，没有释放锁，也就是删除key，那其他线程都无法获取锁，所以要给key设置一个过期时间，就算在执行业务时出现了异常，到了指定的过期时间，锁也会释放
+- 如果在保存好key后，设置过期时间之前，程序出现了异常，过期时间无法设置，那锁就会一直存在reids中，造成死锁
+- 给每个线程的锁设置一个唯一的值。当第一个线程获取到锁后，业务逻辑还未执行完，锁就过期了，这时第二个线程获取到了锁，然后第二个线程也未执行完业务逻辑锁就过期了，第三个线程获取到锁又进来了，然后到了第一个线程删除锁的操作， 这时候删除就是其他线程的锁
+- 删除锁之前要先判断删除的锁是不是当前线程的锁，然后在删除，如果在判断是否是当前线程的锁之后，删除锁之前出现异常，锁无法删除，造成死锁。或者在获取锁后，锁还未过期，在删除之前锁过期了，这是其他线程就进来了，删除的锁也不是当前线程的锁，
+#### redisson的使用
+参照官网(redisson)[https://github.com/redisson/redisson/wiki/Table-of-Content]
+引入maven依赖
+```xml
+<dependency>
+    <groupId>org.redisson</groupId>
+    <artifactId>redisson</artifactId>
+    <version>3.13.3</version>
+</dependency>
+```
+编写配置类
+```java
+@Configuration
+public class RedissonConfig {
+
+    @Bean
+    public RedissonClient redissonClient(){
+        Config config = new Config();
+        config.useSingleServer().setAddress("redis://127.0.0.1:6379");
+        RedissonClient redissonClient = Redisson.create(config);
+        return redissonClient;
+    }
+}
+```
+具体使用参照官方文档。
+- lock(long leaseTime, TimeUnit unit)：指定锁过期时间后，如果业务逻辑执行时间大于锁过期时间，看门狗不会自动续期，推荐使用，可以把锁过期时间设置大一点
+- lock()：在指定锁过期时间，锁的过期时间就是看门狗的过期时间，Config类中的`lockWatchdogTimeout`变量就是看门狗过期时间，为30s。只要占锁成功就会启动一个定时任务，给锁续期，定时任务时每隔10秒续期一次，每次续期10秒：`internalLockLeaseTime / 3`，就是看门狗时间的三分之一，每次续期都蓄满，就是30秒
+```java
+//RedissonLock
+private <T> RFuture<Long> tryAcquireAsync(long waitTime, long leaseTime, TimeUnit unit, long threadId) {
+    if (leaseTime != -1) {
+        return tryLockInnerAsync(waitTime, leaseTime, unit, threadId, RedisCommands.EVAL_LONG);
+    }
+    RFuture<Long> ttlRemainingFuture = tryLockInnerAsync(waitTime,
+                                            commandExecutor.getConnectionManager().getCfg().getLockWatchdogTimeout(),
+                                            TimeUnit.MILLISECONDS, threadId, RedisCommands.EVAL_LONG);
+    ttlRemainingFuture.onComplete((ttlRemaining, e) -> {
+        if (e != null) {
+            return;
+        }
+        //占锁成功
+        // lock acquired
+        if (ttlRemaining == null) {
+            //预期到期续订锁
+            scheduleExpirationRenewal(threadId);
+        }
+    });
+    return ttlRemainingFuture;
+}
+<T> RFuture<T> tryLockInnerAsync(long waitTime, long leaseTime, TimeUnit unit, long threadId, RedisStrictCommand<T> command) {
+    this.internalLockLeaseTime = unit.toMillis(leaseTime);
+    return this.evalWriteAsync(this.getName(), LongCodec.INSTANCE, command, "if (redis.call('exists', KEYS[1]) == 0) then redis.call('hincrby', KEYS[1], ARGV[2], 1); redis.call('pexpire', KEYS[1], ARGV[1]); return nil; end; if (redis.call('hexists', KEYS[1], ARGV[2]) == 1) then redis.call('hincrby', KEYS[1], ARGV[2], 1); redis.call('pexpire', KEYS[1], ARGV[1]); return nil; end; return redis.call('pttl', KEYS[1]);", Collections.singletonList(this.getName()), this.internalLockLeaseTime, this.getLockName(threadId));
+}
+```
+#### 缓存一致性
+- 双写模式
+当数据更新时，把最新数据更新到数据库和缓存
+出现问题：两个线程同时修改同一条数据，第一个线程读取到数据把数据保存到数据，但是在更新缓存中的数据时出现了网络延迟或其他问题，还未更新好缓存第二个线程就读取到了数据，并且把修改更新到了数据库和缓存，此时第一个线程才将数据更新到缓存，这时就出现了脏数据。
+- 失效模式
+更新数据时把缓存中的数据删除
+出现问题：三个请求同时修改同一条数据，假设第一个请求访问速度较快，立马就更新好了数据，并且删除了缓存，第二个请求更新了数据，但还未删除缓存，这时第三个请求从缓存中读取数据，发现没有数据，就去数据库中读取到了第一次修改后的数据，第二个请求这个时候才执行删除缓存的数据，而第三个请求把读取到的第一次修改后的数据更新到了缓存中
+
+解决方案：
+1. 我们能放入缓存的数据就不应该时实时性、一致性要求超高的，所以缓存数据的时候加上过期时间，保证每天拿到的数据都是当前最新的数据即可
+2. 我们不应该过度设计，增加系统的复杂性
+3. 遇到实时性问题、一致性要求超高的数据，就应该查数据

@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.xj.glmall.product.service.CategoryBrandRelationService;
 import com.xj.glmall.product.vo.Catalog2Vo;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -41,6 +43,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
+
+    @Autowired
+    private RedissonClient redisson;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -111,7 +116,22 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
      */
     @Override
     public Map<String, List<Catalog2Vo>> getCatalogJson() {
-        return getCatalogMapRedisLock();
+        return getCatalogMapResisson();
+    }
+
+    /**
+     * 使用redisson实现分布式锁
+     * @return
+     */
+    public Map<String, List<Catalog2Vo>> getCatalogMapResisson(){
+        RLock lock = redisson.getLock("productLock");
+        lock.lock(30,TimeUnit.SECONDS);
+        try{
+            Map<String, List<Catalog2Vo>> catalogJsonFromDB = getCatalogJsonFromDB();
+            return catalogJsonFromDB;
+        }finally {
+            lock.unlock();
+        }
     }
 
     /**
