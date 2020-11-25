@@ -1828,3 +1828,85 @@ private <T> RFuture<Long> tryAcquireAsync(long waitTime, long leaseTime, TimeUni
 1. 我们能放入缓存的数据就不应该时实时性、一致性要求超高的，所以缓存数据的时候加上过期时间，保证每天拿到的数据都是当前最新的数据即可
 2. 我们不应该过度设计，增加系统的复杂性
 3. 遇到实时性问题、一致性要求超高的数据，就应该查数据
+#### 使用springCache简化缓存开发
+1.引入压力
+```java
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-cache</artifactId>
+</dependency>
+//使用redis做缓存，所以还要引入reids依赖
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+```
+2.配置
+在RedisCacheConfiguration中，为我们配置好了cacheManage，我们需要配置的就是指定redis作为缓存,然后就是缓存的名字，缓存名字也可不配置，spring boot会自动为我们生产
+```properties
+spring.cache.type=redis
+#spring.cache.cache-name=demo
+```
+3.使用缓存
+- @Cacheable: Triggers cache population.
+  出发将数据保存到缓存的操作
+- @CacheEvict: Triggers cache eviction.
+  触发将缓存删除的操作
+- @CachePut: Updates the cache without interfering with the method execution.
+  不影响方法执行更新缓存
+- @Caching: Regroups multiple cache operations to be applied on a method.
+  组合以上多个操作
+- @CacheConfig: Shares some common cache-related settings at class-level
+  共享系统的一些缓存配置
+ 
+在启动类上添加`@EnableCaching`注解开启缓存功能，在方法上添加`@Cachable`注解表示该方法返回的结果需要缓存。如果缓存中有，方法被调用，如果没有，调用该方法，然后将方法的结果放入缓存。
+使用该注解需要指定缓存名，类似与分区，如`Cachable("category")`
+
+默认行为：
+- 如果缓存中有，方法不调用
+- key默认自动生成，缓存的名字::Simplekey[]
+- 缓存的value值，默认使用jdk序列化机制，将序列化后的值存到redis
+- 默认过期时间（ttl）为-1，永不过期
+
+自定义：
+- 指定生成的缓存使用的key：key熟悉指定。接受一个SpEL表达式，参照[官方文档](https://docs.spring.io/spring-framework/docs/5.2.11.RELEASE/spring-framework-reference/integration.html#cache-spel-context)
+- 指定缓存的过期时间，永不过期的数据不符合缓存的设计规范：`spring.cache.redis.time-to-live=3600000`，单位为毫秒
+- 将数据使用json格式保存，以防止其他语言不能操纵缓存
+
+配置原理：`CacheAutoConfiguration` -> `RedisCacheConfiguration` -> 自动配置`RedisCacheManager`->初始化了所有的缓存配置->如果`redisCacheConfiguration`有就用已有的，无就用默认配置->修改默认配置需要在容器中添加一个`redisCacheConfiguration`，spring就会应用到当前`RedisCacheManager`管理的所有缓存分区中
+```java
+@EnableConfigurationProperties(CacheProperties.class)
+@EnableCaching
+@Configuration
+public class CacheConfig {
+
+    @Bean
+    public RedisCacheConfiguration redisCacheConfiguration(CacheProperties cacheProperties){
+
+        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig();
+        config
+                .entryTtl(Duration.ofHours(1L))
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericFastJsonRedisSerializer()));
+        CacheProperties.Redis redisProperties = cacheProperties.getRedis();
+
+        if (redisProperties.getTimeToLive() != null) {
+            config = config.entryTtl(redisProperties.getTimeToLive());
+        }
+
+        if (redisProperties.getKeyPrefix() != null) {
+            config = config.prefixKeysWith(redisProperties.getKeyPrefix());
+        }
+
+        if (!redisProperties.isCacheNullValues()) {
+            config = config.disableCachingNullValues();
+        }
+
+        if (!redisProperties.isUseKeyPrefix()) {
+            config = config.disableKeyPrefix();
+        }
+        return config;
+    }
+}
+
+```
