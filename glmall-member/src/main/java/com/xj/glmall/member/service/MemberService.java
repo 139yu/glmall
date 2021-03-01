@@ -3,6 +3,11 @@ package com.xj.glmall.member.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xj.glmall.common.utils.PageUtils;
 import com.xj.glmall.member.entity.MemberEntity;
+import com.xj.glmall.member.exception.EmailExistException;
+import com.xj.glmall.member.exception.UsernameExistException;
+import com.xj.glmall.member.vo.SocialUser;
+import com.xj.glmall.member.vo.UserLoginVo;
+import com.xj.glmall.member.vo.UserRegisterVo;
 
 import java.util.Map;
 
@@ -16,5 +21,11 @@ import java.util.Map;
 public interface MemberService extends IService<MemberEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    void register(UserRegisterVo registerVo) throws UsernameExistException, EmailExistException;
+
+    MemberEntity login(UserLoginVo loginVo);
+
+    MemberEntity authLogin(SocialUser socialUser) throws Exception;
 }
 

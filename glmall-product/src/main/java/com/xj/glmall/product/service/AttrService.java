@@ -19,14 +19,14 @@ import java.util.Map;
 public interface AttrService extends IService<AttrEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
-    PageUtils queryPage(Map<String,Object> params,Long catelogId,String type);
+    PageUtils queryPage(Map<String,Object> params,Long catalogId,String type);
 
     @Override
     boolean save(AttrEntity entity);
 
     boolean saveAttr(AttrVo attrVo);
 
-    PageUtils getBaseAttrList(Map<String, Object> params, Long catelogId,String type);
+    PageUtils getBaseAttrList(Map<String, Object> params, Long catalogId,String type);
 
     AttrRespVo getAttrInfo(Long attrId);
 
@@ -37,5 +37,7 @@ public interface AttrService extends IService<AttrEntity> {
     PageUtils getAttrNoRelation(Map<String, Object> params, Long attrgroupId);
 
     List<Long> selectSearchAttrIds(List<Long> attrIds);
+
+    List<AttrEntity> selectAttrByGroupId(Long groupId);
 }
 

@@ -1,0 +1,16 @@
+spring:
+  thymeleaf:
+    cache: false
+  session:
+    store-type: redis
+  redis:
+    port: 6379
+    host: localhost
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 20000
+        readTimeout: 20000
+  hystrix:
+    enabled: false

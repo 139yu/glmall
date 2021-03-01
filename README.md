@@ -1659,7 +1659,7 @@ spring:
   thymeleaf:
     cache: false
 ```
-3.将页面放在`/resource/template`目录下，静态资源放在`/resource/static`目录下，thymeleaf为我们添加了一些默认配置:
+3.将页面放在`/resource/templates`目录下，静态资源放在`/resource/static`目录下，thymeleaf为我们添加了一些默认配置:
 ```java
 public static final String DEFAULT_PREFIX = "classpath:/templates/";
 public static final String DEFAULT_SUFFIX = ".html";
@@ -1910,3 +1910,230 @@ public class CacheConfig {
 }
 
 ```
+`@ConfigurationProperties`把properties或yml配置文件的内容添加到spring容器中，`@EnableConfiguration`作用就是是`@ConfigurationProperties`生效
+
+### 配置请求映射
+1.实现`org.springframework.web.servlet.config.annotation.WebMvcConfigurer`类，在类上添加`@Configuration`注解
+2.重写`public void addViewControllers(ViewControllerRegistry registry)`方法
+具体如下：
+```java
+@Configuration
+public class GlmallWebConfig implements WebMvcConfigurer {
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addViewController("/login.html").setViewName("login");
+        registry.addViewController("reg.html").setViewName("reg");
+    }
+}
+```
+## session共享问题
+### session复制（同步）方案
+每个服务器存储session的同时同步到其他服务器
+- 优点
+    -  web-server ( Tomcat)原生支持，只需要修改配置文件。
+- 缺点
+    - session同步需要数据传输，占用大量网络带宽，降低了服务器群的业务处理能力
+    - 任意—台web-server保存的数据都是所有web-server的session总和，受到内存限制无法水平扩展更多的web-server
+    - 大型分布式集群情况下，由于所有web-server都全量保存数据，所以此方案不可取。
+适用场景：服务器数量较少的情况
+### 客户端存储
+将session存储在客户端的cookie中
+- 优点
+    - 服务器不需存储session，用户保存自己的session信息到cookie中。节省服务端资源
+- 缺点
+    - 每次http请求，携带用户在cookie中的完整信息，浪费网络带宽
+    - session数据放在cookie中,cookie有长度限制4K，不能保存大量信息
+    - session数据放在cookie中，存在泄漏、篡改、窃取等安全隐患
+    - 这种方式不会使用。
+### hash一致性
+利用访问IP的hash一致性，将同一IP定位到一台服务器，不再去访问其他服务器，所以同一IP的session只存在一台服务器中
+- 优点
+    - 只需要改nginx配置，不需要修改应用代码
+    - 负载均衡，只要hash属性的值分布是均匀的，多台web-server的负载是均衡的
+    - 可以支持web-server水平扩展(session同步法是不行的，受内存限制)
+- 缺点
+    - session还是存在web-server中的，所以web-server重启可能导致部分session丢失，影响业务，如部分用户需要重新登录
+    - 如果web-server水平扩展，rehash后session重新分布，也会有一部分用户路由不到正确的session
+    - 但是以上缺点问题也不是很大，因为session本来都是有有效期的。所以这两种反向代理的方式可以使用
+### 统一存储
+后端统一存储session，将session存储在redis中
+- 优点
+    - 没有安全隐患
+    - 可以水平扩展，数据库/缓存水平切分即可
+    - web-server重启或者扩容都不会有session丢失
+- 缺点
+    - 增加了一次网络调用，并且需要修改应用代码;如将所有的getSession方法替换为从Redis查数据的方式。redis获取数据比内存慢很多
+    - 上面缺点可以用SpringSession完美解决
+场景：不同域名的session不能共享，在存储session时不能将session存储在它的默认域名下，要将session存储的域名放大，存储在父域名中，让所有的子域名都能够访问到
+#### 解决session子域共享问题
+在在需要共享session服务下添加如下代码，将session的作用域设置为父域名
+```java
+@Bean
+public CookieSerializer cookieSerializer(){
+    DefaultCookieSerializer serializer = new DefaultCookieSerializer();
+    serializer.setDomainName("glmall.com");//设置作用域名
+    serializer.setCookieName("GLMALLSESSION");//设置session名
+    return serializer;
+}
+```
+#### 指定存储session使用fastjson序列化
+```java
+@Bean
+public RedisSerializer<Object> redisSerializer(){
+    return new GenericFastJsonRedisSerializer();
+}
+```
+#### 注解`@EnableRedisHttpSession`原理
+1.导入了`RedisHttpSessionConfiguration`配置，在该配置里添加一个redis增删改查的封装类`RedisOperationsSessionRepository
+`。
+2.该类还继承了`SpringHttpSessionConfiguration`，该类的初始化方法配置了`CookieSerializer`，若未指定则使用默认配置。在该类中，还添加了`SessionRepositoryFilter
+`组件，该类本质就是一个servlet filter，每个请求都必须经过该filter
+![](./assets/a.png)
+此实现了抽象方法`doFilterInternal`，在方法中，将`sessionRepository`添加进了`HttpServletRequest`对象中，而`sessionRepository
+`实际上就是`RedisOperationsSessionRepository`，所以每次请求使用的都是同一个`sessionRepository`，除此之外，该方法还对`HttpServletRequest
+`和`HttpServletResponse`进行了封装，在放行方法`filterChain.doFilter(wrappedRequest, wrappedResponse
+)`中传入的也是包装后的`SessionRepositoryRequestWrapper`和`SessionRepositoryResponseWrapper`。所以，我们在获取session时，调用`HttpServletRequest`
+的`getSession()`方法，实际上就是调用的`SessionRepositoryRequestWrapper`的`getSession`方法，该方法中获取到的session就是从`SessionRepository
+`获取的，该类实际类型就是`RedisOperationsSessionRepository`
+```java
+@Override
+protected void doFilterInternal(HttpServletRequest request,
+		HttpServletResponse response, FilterChain filterChain)
+		throws ServletException, IOException {
+	request.setAttribute(SESSION_REPOSITORY_ATTR, this.sessionRepository);
+
+	SessionRepositoryRequestWrapper wrappedRequest = new SessionRepositoryRequestWrapper(
+			request, response, this.servletContext);
+	SessionRepositoryResponseWrapper wrappedResponse = new SessionRepositoryResponseWrapper(
+			wrappedRequest, response);
+
+	try {
+		filterChain.doFilter(wrappedRequest, wrappedResponse);
+	}
+	finally {
+		wrappedRequest.commitSession();
+	}
+}
+```
+3.若要使用其他方式存储session，就需要配置相应的`SessionRepository`
+![](./assets/b.png)
+4.模拟了session的所有功能，如自动续期
+5.该核心原理就是一个装饰者模式
+
+## 购物车实现
+1.用户以游客身份访问购物车，若是第一次访问，给该用户分配一个临时用户身份，并把该身份标识保存在cookie中，有效时间为一个月。将商品添加进购物车时以`固定前缀:临时用户标识`为key，将购物车信息保存在redis中
+2.用户登录后，如果在未登录之前以游客身份添加过商品进购物车，则将临时用户中的商品合并到该用户购物车中，此时用户添加商品进购物车，以`固定前缀:用户id`为key，将购物车信息保存在redis中
+此项目实现：
+- 在购物车服务中自定义一个拦截器，拦截所有请求，标识用户信息和状态
+```java
+@Component
+public class CartInterceptor implements HandlerInterceptor {
+    public static ThreadLocal<UserInfoTo> threadLocal = new ThreadLocal<>();
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        UserInfoTo userInfoTo = new UserInfoTo();
+        HttpSession session = request.getSession();
+        MemberResVo member = (MemberResVo) session.getAttribute(AuthServerConstant.LOGIN_USER);
+        //session中存储了用户信息，说明用户已经登录
+        if (member != null) {
+           userInfoTo.setUserId(member.getId()+"");
+        }else {
+            //用户未登录，标识未临时用户
+            userInfoTo.setTempUser(true);
+
+        }
+        
+        //如果没有临时用户给浏览器分配一个临时用户
+        if (StringUtils.isEmpty(userInfoTo.getUserKey())){
+            String uuid = UUID.randomUUID().toString();
+            userInfoTo.setUserKey(uuid);
+        }
+        threadLocal.set(userInfoTo);
+        return true;
+    }
+
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        UserInfoTo userInfoTo = threadLocal.get();
+        if (!userInfoTo.getTempUser()) {
+            Cookie cookie = new Cookie(CartConstant.TEMP_USER_COOLIE_NAME,userInfoTo.getUserKey());
+            cookie.setDomain("glmall.com");
+            cookie.setMaxAge(CartConstant.TEMP_USER_COOLIE_TIMEOUT);
+            response.addCookie(cookie);
+        }
+    }
+}
+```
+
+```java
+@Data
+@ToString
+public class UserInfoTo {
+    private String userId;
+    private String userKey;
+    private Boolean tempUser = false;//是否是临时用户
+}
+
+```
+
+## 消息队列
+1.大多数应用中，可通过消息服务中间件来提升系统异步通信、扩展解耦能力以及流量控制
+
+2.消息服务中两个重要的概念：消息代理，和目的地。当消息发送者发送消息后，将由消息代理接管，消息代理保证消息传递到指定目的地
+
+3.消息队列主要有两种形式的目的地：
+
+    1).队列：点对点消息通信（point-to-point）
+    2).主题：发布（publish）/订阅（subscribe）消息通信
+4．点对点式:
+
+    1).消员友送者发送消息，消息代理将其放入一个队列中，消息接收者从队列中获消息读取后被移出队列
+    2).消息只有唯一的发送者和接受者，但并不是说只能有一个接收者
+5.发布订阅式:
+
+    发送者（发布者）发送消息到主题，多个接收者(订阅者）监听(订阅)这个三就会在消息到达时同时收到消息
+6.JMS (Java Message Service) JAVA消息服务:
+
+    基于JVM消息代理的规范。ActiveMQ、HornetMQ是JMS实现
+7.AMQP (Advanced Message Queuing Protocol):
+
+    1).高级消息队列协议，也是一个消息代理的规范，兼容JMS
+    2).RabbitMQ是AMQP的实现
+ 
+| |JMS（Java Message Service）| AMQP（Advance Message Queuing Protocol）|
+|  ----  | ----  | ----  |
+|定义| Java api| 网络线级协议
+| 跨语言|否|是|
+|跨平台|否|是|
+|Model|提供两种消息类型：1.Peer to Peer；2.Pub/Sub|提供了五种消息类型：1.direct exchange；2.fanout exchange；3.topic change；4.headers exchange；5.system exchange。本质来讲，后四种和JMS的pub/sub模型没有太大差别，仅是在路由机制上做了更详细的划分|
+|支持消息类型|多种消息类型：TextMessage、MapMessage、BytesMessage、StreamMessage、ObjectMessage、Message（只有消息头和属性）|byte[]，当实际应用时，有复杂的消息，可序列化后发送|
+综合评价|JMS定义了JAVA API层面的标准;在java体系中，多个client均可以通过JMS进行交互，不需要应用修改代码，但是其对跨平台的支持较差|AMQP定义了wire-level层的协议标准;天然具有跨平台、跨语言特性。|
+
+8.Spring支持
+
+    1).spring-jms提供了对JMS的支持
+    2).spring-rabbit提供了对AMQP的支持
+    3).需要ConnectionFactory的实现来连接消息代理提供
+    4).JmsTemplate、RabbitTemplate来发送消息
+    5).@JmsListener (JMS).@RabbitListener (AMQP）注解在方法上监听消息代理发布的消息
+    6).EnableJms、@EnableRabbit开启支持
+9.Spring Boot自动配置
+    
+    1).JmsAutoConfiguration
+    2).RabbitAutoConfiguration
+10.市面的MQ产品
+    
+    1).ActiveMQ、RabbitMQ、RocktMQ、Kafka
+### RabbitMQ概念
+
+#### RabbitMQ简介
+RabbitMQ是一个由erlang开发的AMQP(Advanved Message Queue Protocol)的开源实现。
+####核心概念
+##### Message
+消息，消息是不具名的，它由消息头和消息体组成。消息体是不透明的，而消息头则由一系列的可选属性组成，这些属性包括routing-key,(路由键)、priority(相对于其他消息的优先权)delivery-mode(指出该消息可能需要持久性存储)等。
+##### Publisher
+消息的生产者，也是一个向交换器发布消息的客户端应用程序。
+##### Exchange
+交换器，用来接收生产者发送的消息并将这些消息路由给服务器中的队列。
+
+Exchange有4种类型: direct(默认)，fanout, topic,和headers，不同类型的Exchange转发消息的策略有所区别

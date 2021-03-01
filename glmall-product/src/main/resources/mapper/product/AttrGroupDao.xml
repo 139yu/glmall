@@ -10,7 +10,7 @@
         <result property="sort" column="sort"/>
         <result property="descript" column="descript"/>
         <result property="icon" column="icon"/>
-        <result property="catelogId" column="catelog_id"/>
+        <result property="catalogId" column="catalog_id"/>
     </resultMap>
     <delete id="deleteBatchRelation">
         delete from pms_attr_attrgroup_relation where
@@ -27,7 +27,7 @@
             attr.value_select,
             attr.attr_type,
             attr.enable,
-            attr.catelog_id,
+            attr.catalog_id,
             attr.show_desc
         from
             pms_attr attr
@@ -41,6 +41,36 @@
             ag.attr_group_id = aar.attr_group_id
         where
             ag.attr_group_id = #{attrgroupId}
+
+    </select>
+    <resultMap id="spuItemAttrGroupMap" type="com.xj.glmall.product.vo.SpuItemBaseAttrVo">
+        <result column="attr_group_name" property="groupName"/>
+        <collection property="attrs" ofType="com.xj.glmall.product.vo.SpuBaseAttrVo">
+            <result property="attrValue" column="attr_value"/>
+            <result column="attr_name" property="attrName"/>
+        </collection>
+    </resultMap>
+    <select id="listAttrGroupWithAttrsBySpuIdAndCatalogId"
+            resultMap="spuItemAttrGroupMap">
+        SELECT
+	        ag.attr_group_id,
+	        ag.attr_group_name,
+	        pav.attr_name,
+	        pav.attr_value,
+	        pav.spu_id
+        FROM
+        	`pms_attr_group` ag
+        left join
+        	pms_attr_attrgroup_relation aar
+        on
+        	ag.attr_group_id = aar.attr_group_id
+        left join
+        	pms_product_attr_value pav
+        on
+        	pav.attr_id = aar.attr_id
+        where
+        	ag.catalog_id = #{catalogId} and pav.spu_id = #{spuId}
+
 
     </select>
 

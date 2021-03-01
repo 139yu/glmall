@@ -24,6 +24,10 @@ import com.xj.glmall.product.service.ProductAttrValueService;
 
 @Service("productAttrValueService")
 public class ProductAttrValueServiceImpl extends ServiceImpl<ProductAttrValueDao, ProductAttrValueEntity> implements ProductAttrValueService {
+
+    @Autowired
+    private ProductAttrValueDao productAttrValueDao;
+
     @Autowired
     private AttrDao attrDao;
     @Override
@@ -69,6 +73,12 @@ public class ProductAttrValueServiceImpl extends ServiceImpl<ProductAttrValueDao
             return item;
         }).collect(Collectors.toList());
         this.saveBatch(collect);
+    }
+
+    @Override
+    public List<ProductAttrValueEntity> listBySpuIdAndGroupId(Long spuId,Long groupId) {
+        List<ProductAttrValueEntity> list = productAttrValueDao.listByGroupId(spuId,groupId);
+        return list;
     }
 
 }

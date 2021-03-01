@@ -4,12 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Catalog2Vo {
+public class Catalog2Vo implements Serializable {
     private String catalog1Id;
     private String id;
     private String name;
@@ -18,7 +19,7 @@ public class Catalog2Vo {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Catalog3Vo{
+    public static class Catalog3Vo implements Serializable{
         private String catalog2Id;
         private String id;
         private String name;

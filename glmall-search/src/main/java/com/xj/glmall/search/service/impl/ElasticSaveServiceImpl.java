@@ -6,6 +6,7 @@ import com.xj.glmall.search.config.GlmallElasticsearchConfig;
 import com.xj.glmall.search.constant.EsConstant;
 import com.xj.glmall.search.service.ElasticSaveService;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ElasticSaveServiceImpl implements ElasticSaveService {
     @Autowired
-    private RestHighLevelClient restHighLevelClient;
+    private RestHighLevelClient esRestClient;
     @Override
     public Boolean productStatusUp(List<SkuEsModel> skuEsModelList) throws IOException {
         BulkRequest bulkRequest = new BulkRequest();
@@ -35,7 +36,8 @@ public class ElasticSaveServiceImpl implements ElasticSaveService {
             indexRequest.source(s,XContentType.JSON);
             bulkRequest.add(indexRequest);
         }
-        BulkResponse bulkResponse = restHighLevelClient.bulk(bulkRequest, GlmallElasticsearchConfig.COMMON_OPTIONS);
+        BulkResponse bulkResponse = esRestClient.bulk(bulkRequest, GlmallElasticsearchConfig.COMMON_OPTIONS);
+        BulkItemResponse[] items = bulkResponse.getItems();
         boolean b = bulkResponse.hasFailures();
         if (b) {
             List<String> collect = Arrays.stream(bulkResponse.getItems()).map(item -> {

@@ -29,8 +29,7 @@ public class GlmallElasticsearchConfig {
     public RestHighLevelClient esRestClient(){
         RestClientBuilder builder = null;
         builder = RestClient.builder(
-                new HttpHost("localhost", 9200, "http"),
-                new HttpHost("localhost", 9201, "http")
+                new HttpHost("106.55.2.133", 9200, "http")
         );
         RestHighLevelClient client = new RestHighLevelClient(builder);
         return client;

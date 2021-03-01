@@ -3,6 +3,8 @@ package com.xj.glmall.product.service.impl;
 import com.xj.glmall.product.service.CategoryBrandRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Map;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -39,6 +41,12 @@ public class BrandServiceImpl extends ServiceImpl<BrandDao, BrandEntity> impleme
 
             //TODO 跟新其他关联表
         }
+    }
+
+    @Override
+    public List<BrandEntity> getBrandsByIds(List<Long> brandIds) {
+        List<BrandEntity> brandEntities = this.baseMapper.selectList(new QueryWrapper<BrandEntity>().in("brand_id", brandIds));
+        return brandEntities;
     }
 
 }

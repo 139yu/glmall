@@ -18,4 +18,6 @@ import java.util.List;
 public interface AttrDao extends BaseMapper<AttrEntity> {
 
     List<Long> selectSearchAttrIds(@Param("attrIds") List<Long> attrIds);
+
+    List<AttrEntity> selectAttrByGroupId(@Param("groupId") Long groupId);
 }

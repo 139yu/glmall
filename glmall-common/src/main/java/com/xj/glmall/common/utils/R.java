@@ -31,11 +31,15 @@ public class R<T> extends HashMap<String, Object> {
 		this.put("data",o);
 		return this;
 	}
-	public <T> T getData(TypeReference<T> typeReference){
-		Object data = get("data");
+	public <T> T getData(String key,TypeReference<T> typeReference){
+		Object data = get(key);
 		String jsonString = JSON.toJSONString(data);
 		T t = JSON.parseObject(jsonString, typeReference);
 		return t;
+	}
+	public <T> T getData(TypeReference<T> typeReference){
+		T data = getData("data", typeReference);
+		return data;
 	}
 	public static R error() {
 		return error(HttpStatus.SC_INTERNAL_SERVER_ERROR, "未知异常，请联系管理员");

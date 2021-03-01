@@ -57,10 +57,10 @@ public class CategoryBrandRelationServiceImpl extends ServiceImpl<CategoryBrandR
         Long brandId = categoryBrandRelation.getBrandId();
         BrandEntity brandEntity = brandDao.selectById(brandId);
         categoryBrandRelation.setBrandName(brandEntity.getName());
-        Long catelogId = categoryBrandRelation.getCatelogId();
-        CategoryEntity categoryEntity = categoryDao.selectById(catelogId);
-        categoryBrandRelation.setCatelogName(categoryEntity.getName());
-        Integer count = categoryBrandRelationDao.selectCount(new QueryWrapper<CategoryBrandRelationEntity>().eq("brand_id", brandId).eq("catelog_id", catelogId));
+        Long catalogId = categoryBrandRelation.getCatalogId();
+        CategoryEntity categoryEntity = categoryDao.selectById(catalogId);
+        categoryBrandRelation.setCatalogName(categoryEntity.getName());
+        Integer count = categoryBrandRelationDao.selectCount(new QueryWrapper<CategoryBrandRelationEntity>().eq("brand_id", brandId).eq("catalog_id", catalogId));
         if(count > 0) {
             return;
         }
@@ -83,7 +83,7 @@ public class CategoryBrandRelationServiceImpl extends ServiceImpl<CategoryBrandR
 
     @Override
     public List<BrandEntity> getBrandByCatId(Long catId) {
-        List<CategoryBrandRelationEntity> relationList = categoryBrandRelationDao.selectList(new QueryWrapper<CategoryBrandRelationEntity>().eq("catelog_id", catId));
+        List<CategoryBrandRelationEntity> relationList = categoryBrandRelationDao.selectList(new QueryWrapper<CategoryBrandRelationEntity>().eq("catalog_id", catId));
         List<BrandEntity> brandList = relationList.stream().map(item -> {
             return brandDao.selectById(item.getBrandId());
         }).collect(Collectors.toList());

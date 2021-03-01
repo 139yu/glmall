@@ -13,7 +13,7 @@
         <result property="valueSelect" column="value_select"/>
         <result property="attrType" column="attr_type"/>
         <result property="enable" column="enable"/>
-        <result property="catelogId" column="catelog_id"/>
+        <result property="catalogId" column="catalog_id"/>
         <result property="showDesc" column="show_desc"/>
     </resultMap>
     <select id="selectSearchAttrIds" resultType="java.lang.Long">
@@ -22,6 +22,26 @@
             #{id}
         </foreach>
         and search_type = 1
+    </select>
+    <select id="selectAttrByGroupId" resultType="com.xj.glmall.product.entity.AttrEntity">
+        select
+            a.attr_id,
+            a.attr_name,
+            a.search_type,
+            a.value_type,
+            a.icon,
+            a.value_select,
+            a.attr_type,
+            a.enable,
+            a.catalog_id,
+            a.show_desc
+        from
+            pms_attr a
+        right join
+            pms_attr_attrgroup_relation
+        on
+            a.attr_id = b.attr_id
+        where b.group_id = #{groupId}
     </select>
 
 

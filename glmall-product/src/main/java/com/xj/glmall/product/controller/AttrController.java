@@ -62,16 +62,16 @@ public class AttrController {
         return R.ok().put("page", page);
     }
 
-    //@GetMapping("/{attrType}/list/{catelogId}")
-    public R list(@RequestParam Map<String, Object> params,@PathVariable("catelogId") Long catelogId,@PathVariable("attrType") String type){
-        PageUtils page = attrService.queryPage(params,catelogId,type);
+    //@GetMapping("/{attrType}/list/{catalogId}")
+    public R list(@RequestParam Map<String, Object> params,@PathVariable("catalogId") Long catalogId,@PathVariable("attrType") String type){
+        PageUtils page = attrService.queryPage(params,catalogId,type);
 
         return R.ok().put("page", page);
     }
 
-    @GetMapping("/{attrType}/list/{catelogId}")
-    public R baseAttrList(@RequestParam Map<String,Object> params,@PathVariable("catelogId") Long catelogId,@PathVariable("attrType") String type){
-        PageUtils page = attrService.getBaseAttrList(params,catelogId,type);
+    @GetMapping("/{attrType}/list/{catalogId}")
+    public R baseAttrList(@RequestParam Map<String,Object> params,@PathVariable("catalogId") Long catalogId,@PathVariable("attrType") String type){
+        PageUtils page = attrService.getBaseAttrList(params,catalogId,type);
         return R.ok().put("page",page);
     }
     /**
@@ -84,8 +84,8 @@ public class AttrController {
         return R.ok().put("attr", attr);
     }
 /*
-    @GetMapping("/sale/list/{catelogId}")
-    public R saleList(@RequestParam Map<String, Object> map, @PathVariable("catelogId") Long catelogId) {
+    @GetMapping("/sale/list/{catalogId}")
+    public R saleList(@RequestParam Map<String, Object> map, @PathVariable("catalogId") Long catalogId) {
 
     }*/
 

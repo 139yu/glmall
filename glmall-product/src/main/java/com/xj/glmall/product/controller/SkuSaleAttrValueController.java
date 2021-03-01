@@ -1,6 +1,7 @@
 package com.xj.glmall.product.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,10 @@ public class SkuSaleAttrValueController {
         return R.ok().put("page", page);
     }
 
+    @GetMapping("/listStringSaleAttr")
+    public List<String> listStringSaleAttr(@RequestParam("skuId") Long skuId){
+        return skuSaleAttrValueService.listStringSaleAttr(skuId);
+    }
 
     /**
      * 信息

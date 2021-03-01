@@ -7,3 +7,17 @@ spring:
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
+  mail:
+    host: smtp.qq.com
+    username: 1395759132@qq.com
+    password: cbekmukmpwbeibbe #QQ邮箱授权码
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+  redis:
+    host: 127.0.0.1
+    port: 6379

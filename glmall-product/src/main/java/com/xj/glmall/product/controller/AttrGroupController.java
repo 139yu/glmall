@@ -46,9 +46,9 @@ public class AttrGroupController {
         relationService.saveBatch(vos);
         return R.ok();
     }
-    @GetMapping("/{catelogId}/withattr")
-    public R getAttrGroupWithAttr(@PathVariable("catelogId") Long catelogId){
-        List<AttrGroupVo> attrGroupVoList = attrGroupService.getAttrGroupWithAttr(catelogId);
+    @GetMapping("/{catalogId}/withattr")
+    public R getAttrGroupWithAttr(@PathVariable("catalogId") Long catalogId){
+        List<AttrGroupVo> attrGroupVoList = attrGroupService.getAttrGroupWithAttr(catalogId);
         return R.ok().put("data",attrGroupVoList);
     }
 
@@ -84,8 +84,8 @@ public class AttrGroupController {
     @GetMapping("/info/{attrGroupId}")
     public R info(@PathVariable("attrGroupId") Long attrGroupId){
 		AttrGroupEntity attrGroup = attrGroupService.getById(attrGroupId);
-        Long[] catelogPath = categoryService.findCatelogPath(attrGroup.getCatelogId());
-        attrGroup.setCatelogPath(catelogPath);
+        Long[] catalogPath = categoryService.findCatalogPath(attrGroup.getCatalogId());
+        attrGroup.setCatalogPath(catalogPath);
         return R.ok().put("attrGroup", attrGroup);
     }
 

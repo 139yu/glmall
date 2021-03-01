@@ -95,10 +95,13 @@
             </b>
             <ul>
                 <li>
-                    <a href="/登录页面\index.html">你好，请登录</a>
+                    <a href="http://auth.glmall.com/login.html"
+                       th:if="${session.loginUser == null}">你好，请登录</a>
+                    <a href="javascript:;" th:if="${session.loginUser != null}">你好，[[${session.loginUser == null ? '' :
+                        session.loginUser.nickname}]]</a>
                 </li>
                 <li>
-                    <a href="/注册页面\index.html" class="li_2">免费注册</a>
+                    <a href="http://auth.glmall.com/reg.html" class="li_2">免费注册</a>
                 </li>
                 <span>|</span>
                 <li>
@@ -115,12 +118,12 @@
             <input id="searchText" type="text" placeholder=""/>
             <span style="background: url('/static/index/img/img_12.png') 0 -1px;"></span>
             <!--<button><i class="glyphicon"></i></button>-->
-            <a href="#"><img src="/static/index/img/img_09.png" onclick="search()"/></a>
+            <a href="javascript:search()"><img src="/static/index/img/img_09.png"/></a>
         </div>
         <div class="header_ico">
             <div class="header_gw">
                 <img src="/static/index/img/img_15.png"/>
-                <span><a href="/购物车\One_JDshop.html">我的购物车</a></span>
+                <span><a href="http://cart.glmall.com/cart.html">我的购物车</a></span>
                 <span>0</span>
             </div>
             <div class="header_ko">
@@ -607,13 +610,6 @@
 
 
 </body>
-<script type="text/javascript">
-    function search() {
-        var keyword = $("#searchText").val()
-        window.location.href = "http://search.gulimall.com/search.html?keyword=" + keyword;
-    }
-
-</script>
 <script type="text/javascript" src="/static/index/js/text.js"></script>
 <script type="text/javascript" src="/static/index/js/header.js"></script>
 <script type="text/javascript" src="/static/index/js/secend.js"></script>
@@ -621,4 +617,13 @@
 <script type="text/javascript" src="/static/index/js/index.js"></script>
 <script type="text/javascript" src="/static/index/js/left,top.js"></script>
 <script type="text/javascript" src="/static/index/js/catalogLoader.js"></script>
+<script>
+    function search() {
+        let searchKey = $('#searchText').val()
+        window.location.href="http://search.glmall.com/list.html?keyword=" + searchKey;
+    }
+    /*$('#search').on('click',function(){
+        search()
+    })*/
+</script>
 </html>

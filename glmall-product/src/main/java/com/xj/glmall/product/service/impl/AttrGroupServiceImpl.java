@@ -8,6 +8,7 @@ import com.xj.glmall.product.entity.AttrEntity;
 import com.xj.glmall.product.service.AttrService;
 import com.xj.glmall.product.vo.AttrGroupRelationVo;
 import com.xj.glmall.product.vo.AttrGroupVo;
+import com.xj.glmall.product.vo.SpuItemBaseAttrVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,7 +65,7 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
                     wrapper
             );
         }else {
-            wrapper.eq("catelog_id",categoryId);
+            wrapper.eq("catalog_id",categoryId);
             page = this.page(new Query<AttrGroupEntity>().getPage(params), wrapper);
         }
         return new PageUtils(page);
@@ -83,8 +84,8 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
     }
 
     @Override
-    public List<AttrGroupVo> getAttrGroupWithAttr(Long catelogId) {
-        List<AttrGroupEntity> groupEntities = attrGroupDao.selectList(new QueryWrapper<AttrGroupEntity>().eq("catelog_id", catelogId));
+    public List<AttrGroupVo> getAttrGroupWithAttr(Long catalogId) {
+        List<AttrGroupEntity> groupEntities = attrGroupDao.selectList(new QueryWrapper<AttrGroupEntity>().eq("catalog_id", catalogId));
         List<AttrGroupVo> collect = groupEntities.stream().map(item -> {
             AttrGroupVo attrGroupVo = new AttrGroupVo();
             BeanUtils.copyProperties(item, attrGroupVo);
@@ -93,6 +94,18 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
             return attrGroupVo;
         }).collect(Collectors.toList());
         return collect;
+    }
+
+    @Override
+    public List<AttrGroupEntity> listByCategoryId(Long catalogId) {
+        List<AttrGroupEntity> list = baseMapper.selectList(new QueryWrapper<AttrGroupEntity>().eq("catalog_id", catalogId));
+        return list;
+    }
+
+    @Override
+    public List<SpuItemBaseAttrVo> listAttrGroupWithAttrsBySpuIdAndCatalogId(Long spuId, Long catalogId) {
+        List<SpuItemBaseAttrVo> list = attrGroupDao.listAttrGroupWithAttrsBySpuIdAndCatalogId(spuId,catalogId);;
+        return list;
     }
 
 

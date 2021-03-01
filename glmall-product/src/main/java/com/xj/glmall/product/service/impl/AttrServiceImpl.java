@@ -13,6 +13,7 @@ import com.xj.glmall.product.vo.AttrRespVo;
 import com.xj.glmall.product.vo.AttrVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -63,7 +64,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
     }
 
     @Override
-    public PageUtils queryPage(Map<String, Object> params, Long catelogId,String type) {
+    public PageUtils queryPage(Map<String, Object> params, Long catalogId,String type) {
         IPage<AttrEntity> page = null;
         QueryWrapper<AttrEntity> wrapper = new QueryWrapper<>();
         wrapper.eq("attr_type","base".equalsIgnoreCase(type) ? ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode() : ProductConstant.AttrEnum.ATTR_TYPE_SALE.getCode());
@@ -73,10 +74,10 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
                 obj.eq("attr_id",key).or().like("attr_name",key).or().like("vaule_select",key);
             });
         }
-        if (catelogId == 0) {
+        if (catalogId == 0) {
             page = this.page(new Query<AttrEntity>().getPage(params),wrapper);
         }else {
-            wrapper.eq("catelog_id",catelogId);
+            wrapper.eq("catalog_id",catalogId);
 
             page = this.page(new Query<AttrEntity>().getPage(params),wrapper);
         }
@@ -105,13 +106,13 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
     }
 
     @Override
-    public PageUtils getBaseAttrList(Map<String, Object> params, Long catelogId,String type) {
+    public PageUtils getBaseAttrList(Map<String, Object> params, Long catalogId,String type) {
         IPage<AttrEntity> page = null;
         QueryWrapper<AttrEntity> wrapper = new QueryWrapper<>();
         wrapper.eq("attr_type","base".equalsIgnoreCase(type) ? ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode() : ProductConstant.AttrEnum.ATTR_TYPE_SALE.getCode());
         String key = (String) params.get("key");
-        if (catelogId != 0) {
-            wrapper.eq("catelog_id",catelogId);
+        if (catalogId != 0) {
+            wrapper.eq("catalog_id",catalogId);
         }
         if (!StringUtils.isEmpty(key)) {
             wrapper.and(obj -> {
@@ -133,14 +134,15 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
                 }
             }
             //设置分类名
-            CategoryEntity categoryEntity = categoryDao.selectById(attrRespVo.getCatelogId());
-            attrRespVo.setCatelogName(categoryEntity.getName());
+            CategoryEntity categoryEntity = categoryDao.selectById(attrRespVo.getCatalogId());
+            attrRespVo.setCatalogName(categoryEntity.getName());
             return attrRespVo;
         }).collect(Collectors.toList());
         pageUtils.setList(attrRespVoList);
         return pageUtils;
     }
 
+    @Cacheable(value = "attr",key = "'attrId:'+#root.args[0]")
     @Override
     public AttrRespVo getAttrInfo(Long attrId) {
         AttrEntity attrEntity = attrDao.selectById(attrId);
@@ -149,8 +151,8 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         AttrGroupEntity attrGroup = getAttrGroup(attrId);
         attrRespVo.setGroupName(attrGroup.getAttrGroupName());
         attrRespVo.setAttrGroupId(attrGroup.getAttrGroupId());
-        Long[] catelogPath = categoryService.findCatelogPath(attrRespVo.getCatelogId());
-        attrRespVo.setCatelogPath(catelogPath);
+        Long[] catalogPath = categoryService.findCatalogPath(attrRespVo.getCatalogId());
+        attrRespVo.setCatalogPath(catalogPath);
         return attrRespVo;
     }
 
@@ -198,8 +200,8 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
     @Override
     public PageUtils getAttrNoRelation(Map<String, Object> params, Long attrgroupId) {
         AttrGroupEntity attrGroup = attrGroupDao.selectById(attrgroupId);
-        Long catelogId = attrGroup.getCatelogId();
-        List<AttrGroupEntity> groupEntities = attrGroupDao.selectList(new QueryWrapper<AttrGroupEntity>().eq("catelog_id", catelogId));
+        Long catalogId = attrGroup.getCatalogId();
+        List<AttrGroupEntity> groupEntities = attrGroupDao.selectList(new QueryWrapper<AttrGroupEntity>().eq("catalog_id", catalogId));
         List<Long> attrGroupIds = groupEntities.stream().map(item -> {
             return item.getAttrGroupId();
         }).collect(Collectors.toList());
@@ -209,7 +211,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         }).collect(Collectors.toList());
         String key = (String) params.get("key");
         QueryWrapper<AttrEntity> wrapper = new QueryWrapper<>();
-        wrapper.eq("catelog_id",catelogId).notIn("attr_id",attIds).eq("attr_type",ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode());
+        wrapper.eq("catalog_id",catalogId).notIn("attr_id",attIds).eq("attr_type",ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode());
         if (attIds != null && attIds.size() > 0) {
             wrapper.notIn("attr_id",attIds);
         }
@@ -226,5 +228,11 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
     public List<Long> selectSearchAttrIds(List<Long> attrIds) {
         List<Long> ids = this.baseMapper.selectSearchAttrIds(attrIds);
         return ids;
+    }
+
+    @Override
+    public List<AttrEntity> selectAttrByGroupId(Long groupId) {
+        List<AttrEntity> attrEntities = attrDao.selectAttrByGroupId(groupId);
+        return attrEntities;
     }
 }

@@ -3,8 +3,10 @@ package com.xj.glmall.product.vo;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class AttrVo {
+public class AttrVo implements Serializable {
     /**
      * 属性id
      */
@@ -40,7 +42,7 @@ public class AttrVo {
     /**
      * 所属分类
      */
-    private Long catelogId;
+    private Long catalogId;
     /**
      * 快速展示【是否展示在介绍上；0-否 1-是】，在sku中仍然可以调整
      */

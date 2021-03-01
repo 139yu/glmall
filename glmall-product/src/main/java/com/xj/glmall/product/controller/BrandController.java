@@ -1,6 +1,7 @@
 package com.xj.glmall.product.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import com.xj.glmall.common.valid.AddGroup;
@@ -50,6 +51,12 @@ public class BrandController {
 		BrandEntity brand = brandService.getById(brandId);
 
         return R.ok().put("brand", brand);
+    }
+
+    @PostMapping("/info/listBrands")
+    public R listBrands(@RequestBody List<Long> brandIds){
+        List<BrandEntity> brandEntities = brandService.getBrandsByIds(brandIds);
+        return R.ok().put("brandList",brandEntities);
     }
 
     /**
