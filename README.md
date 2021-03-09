@@ -2137,3 +2137,144 @@ RabbitMQ是一个由erlang开发的AMQP(Advanved Message Queue Protocol)的开�
 交换器，用来接收生产者发送的消息并将这些消息路由给服务器中的队列。
 
 Exchange有4种类型: direct(默认)，fanout, topic,和headers，不同类型的Exchange转发消息的策略有所区别
+
+#### RabbitMQ使用
+##### 声明交换机参数说明：public DirectExchange(String name, boolean durable, boolean autoDelete, Map<String, Object> arguments)
+    
+    name：交换机名字
+    durable：是否持久化，持久化是指rabbit MQ服务器重启后交换机依旧有效
+    autoDelete：是否自动删除，自动删除是指服务器不再使用时删除
+    arguments：可自定义一些其他参数
+    
+##### 声明队列参数说明：public Queue(String name, boolean durable, boolean exclusive, boolean autoDelete, Map<String, Object> arguments)
+
+    name：队列名
+    durable：是否持久化，同上
+    exclusive：是否独占队列
+    autoDelete：是否自动删除
+    arguments：同上
+
+直连交换机路由键为队列名即可，队列与交换机创建后，都要使用`AmqpAdmin`中的`declareExchange`和`declareQueue`说明，该类是一个接口，它的实现类是`RabbitAdmin`。
+
+队列与交换机声明后，要将队列与交换机绑定，队列才可接收到消息。
+
+    1).定义一个绑定对象：public Binding(String destination, DestinationType destinationType, String exchange, String routingKey,Map<String, Object> arguments)
+        
+        destination：需要绑定的目标
+        destinationType：绑定目标的类型，也可交换机绑定交换机
+        exchange：交换机名字
+        routingKey：路由键
+        arguments：自定义的参数
+    2).定义好绑定对象后，再使用AmqpAdmin类的方法：void declareBinding(Binding binding)即可
+##### 发布消息参数说明：public void convertAndSend(String exchange, String routingKey, final Object object)
+    
+    exchange：交换机名
+    routingKey：路由键
+    object：消息内容
+    
+发送的消息要先经过`MessageConverter`转化，如果在spring容器中未自定义，则默认使用`SimpleMessageConverter`。在此类中，如果发送的消息是String
+，会被转化为字节数组，如果实现了`Serializable`接口，则会被序列化。
+
+在`RabbitAutoConfiguration`中，如果我们自定义了`MessageConverter`，则会使用我们自定义的，如下，使用`Jackson2JsonMessageConverter`：
+```java
+@Configuration
+public class RabbitMQConfig {
+    @Bean
+    public MessageConverter messageConverter(){
+        MessageConverter messageConverter = new Jackson2JsonMessageConverter();
+        return messageConverter;
+    }
+}
+```
+##### 监听消息
+监听消息需要在启动类上加上`@EnableRabbit`注解，开启相关功能
+
+1.`@RabbitListener`
+
+该注解标注在类和方法上
+
+使用此注解必须要有`@EnableRabbit`，而且监听的队列必须存在，否则就会报异常
+
+使用：在方法上加上此注解，并指定监听的队列：
+```java
+@RabbitListener(queues = {"test-queue-1"})
+public void receiveMessage(Message message, OrderItemEntity orderItemEntity){
+    System.out.println(orderItemEntity);
+    System.out.println("消息内容->>>>" + message);
+}
+```
+此注解中的`queues`属性值是队列名，它是一个String类型的数组，可监听多个队列。方法中的`Message`参数是amqp核心包下的一个类，该类中包含了消息体，消息的属性，如消息头等信息。我们发送的消息是说明类型，在方法中写上此类型的参数`OrderItemEntity`，spring会自动为我们转化。如果不是该类型，则此参数值为空。
+
+queue可以有多个方法监听，但是同一个消息只有一个客户端能接收到，只要接收到消息，队列就会删除消息。而且只有当消息处理完，方法运行结束，才能接收下一个消息
+
+2.`@RabbitHandler`
+
+此注解只能标注类方法上。
+
+使用该注解需要配置`@RabbitListener`，`@RabbitListener`标注一个类，标识该类可以监听哪些消息队列，而处理消息的方法需要加上`@RabbitHandler`，标识该方法可以处理接收的消息。
+
+使用场景：当一个或多个队列接收到的消息类型不同时，可以重载区分不同的消息
+```java
+@RabbitHandler
+public void receiveMessage(Message message, OrderItemEntity orderItemEntity, Channel channel){
+    System.out.println(orderItemEntity);
+    System.out.println("receiveOrderItemEntityMessage->>>>" + message);
+}
+@RabbitHandler
+public void receiveMessage(Message message, OrderReturnApplyEntity orderReturnApplyEntity, Channel channel){
+    System.out.println(orderReturnApplyEntity);
+    System.out.println("receiveOrderReturnApplyEntityMessage->>>>" + message);
+}
+```
+##### RabbitMQ消息确认机制-可靠抵达
+
+在发送消息的时候，可能会因为网络抖动、服务宕机或接收消息时网络抖动等情况丢失消息。解决方法：
+
+1.保证消息不丢失，可靠抵达，可以使用事务消息，性能下降250倍，为此引入确认机制
+ 
+2.publisher confirmCallback 确认模式
+
+- `spring.rabbitmq.publisher-confirms=true`
+- 在创建connectionFactory 的时候设置PublisherConfirms(true)选项开启confirmcallback 。
+
+`ConfirmCallback`是一个接口，在`RabbitTemplate`类有这个属性，并且有它的set方法，所以我们实现这个接口，并未`RabbitTemplate`设置
+```java
+@Configuration
+public class RabbitMQConfig {
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Bean
+    public MessageConverter messageConverter(){
+        MessageConverter messageConverter = new Jackson2JsonMessageConverter();
+        return messageConverter;
+    }
+
+    /**
+     * @PostConstruct 在当前类执行完构造方法后执行该注解标注的方法
+     */
+    @PostConstruct
+    public void initRabbitTemplate(){
+        rabbitTemplate.setConfirmCallback(new RabbitTemplate.ConfirmCallback() {
+            /**
+             * 消息确认回调方法
+             * @param correlationData 用来表示消息唯一性
+             * @param ack   消息是否成功接收到
+             * @param cause 失败原因
+             */
+            @Override
+            public void confirm(CorrelationData correlationData, boolean ack, String cause) {
+
+            }
+        });
+    }
+}
+```
+消息只要被broker（代理）接收到就会执行confirmCallback，如果是cluster（集群）模式，需要所有broker 接收到才会调用confirmCallback。
+
+被broker 接收到只能表示message已经到达服务器，并不能保证消息定会被投递到目标queue里。所以需要用到接下来的returnCallback
+
+3.publisher returnCallback未投递到queue退回模式. 
+
+4.consumer ack机制
